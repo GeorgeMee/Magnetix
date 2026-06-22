@@ -33,14 +33,14 @@ func resolve_for_body(body : CustBody) -> void:
 	for static_body in static_bodies:
 		_resolve_collision(body, static_body)
 
-func _resolve_collision(dynamic : CustBody, static : CustBody) -> void:
-	if not dynamic.collision_box.overlaps(static.collision_box):
+func _resolve_collision(dynamic : CustBody, static_body : CustBody) -> void:
+	if not dynamic.collision_box.overlaps(static_body.collision_box):
 		return
 
-	var overlap_left := dynamic.collision_box.get_right() - static.collision_box.get_left()
-	var overlap_right := static.collision_box.get_right() - dynamic.collision_box.get_left()
-	var overlap_top := dynamic.collision_box.get_bottom() - static.collision_box.get_top()
-	var overlap_bottom := static.collision_box.get_bottom() - dynamic.collision_box.get_top()
+	var overlap_left := dynamic.collision_box.get_right() - static_body.collision_box.get_left()
+	var overlap_right := static_body.collision_box.get_right() - dynamic.collision_box.get_left()
+	var overlap_top := dynamic.collision_box.get_bottom() - static_body.collision_box.get_top()
+	var overlap_bottom := static_body.collision_box.get_bottom() - dynamic.collision_box.get_top()
 
 	var min_overlap_x := minf(overlap_left, overlap_right)
 	var min_overlap_y := minf(overlap_top, overlap_bottom)
