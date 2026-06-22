@@ -27,12 +27,12 @@ func _process(_delta : float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var field_color := Color.RED if polarity == Polarity.NORTH else Color.BLUE
+	var field_color := Color.BLUE if polarity == Polarity.NORTH else Color.RED
 	field_color = field_color.darkened(0.5)
 	field_color.a = 0.3
 	draw_rect(Rect2(Vector2(0, -GameManager.ceiling_offset), Vector2(field_length, GameManager.ceiling_offset)), field_color)
 
-	var magnet_color := Color.RED if polarity == Polarity.NORTH else Color.BLUE
+	var magnet_color := Color.BLUE if polarity == Polarity.NORTH else Color.RED
 	var magnet_h := 16.0
 	var magnet_y := -GameManager.ceiling_offset if placement == Placement.CEILING else -magnet_h
 	draw_rect(Rect2(Vector2(0, magnet_y), Vector2(field_length, magnet_h)), magnet_color)
