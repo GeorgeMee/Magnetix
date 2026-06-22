@@ -48,6 +48,8 @@ func _draw() -> void:
 	if current_surface == Surface.CEILING:
 		color = color.lightened(0.3)
 	draw_rect(Rect2(Vector2.ZERO, Vector2(CHAR_WIDTH, CHAR_HEIGHT)), color)
+	if magnetism_active:
+		draw_rect(Rect2(Vector2(2, 2), Vector2(CHAR_WIDTH - 4, CHAR_HEIGHT - 4)), Color.WHITE, false, 3.0)
 	draw_rect(Rect2(Vector2.ZERO, Vector2(CHAR_WIDTH, CHAR_HEIGHT)), Color.BLACK, false, 2.0)
 
 func _setup_lane_positions() -> void:
@@ -124,11 +126,8 @@ func _fall_to_floor(delta : float) -> void:
 		current_surface = Surface.FLOOR
 		physics_body.velocity.y = 0
 
-func activate_magnetism() -> void:
-	magnetism_active = true
-
-func deactivate_magnetism() -> void:
-	magnetism_active = false
+func toggle_magnetism() -> void:
+	magnetism_active = not magnetism_active
 
 func swap_lane() -> void:
 	lane = Lane.BOTTOM if lane == Lane.TOP else Lane.TOP

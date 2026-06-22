@@ -1,10 +1,8 @@
 class_name GameHUD
 extends CanvasLayer
 
-signal magnetism_a_pressed
-signal magnetism_a_released
-signal magnetism_b_pressed
-signal magnetism_b_released
+signal magnetism_a_toggled
+signal magnetism_b_toggled
 signal swap_pressed
 
 @onready var score_label : Label = %ScoreLabel
@@ -28,10 +26,8 @@ func _process(_delta : float) -> void:
 			_show_game_over()
 
 func _setup_touch_buttons() -> void:
-	btn_magnet_a.button_down.connect(func(): magnetism_a_pressed.emit())
-	btn_magnet_a.button_up.connect(func(): magnetism_a_released.emit())
-	btn_magnet_b.button_down.connect(func(): magnetism_b_pressed.emit())
-	btn_magnet_b.button_up.connect(func(): magnetism_b_released.emit())
+	btn_magnet_a.pressed.connect(func(): magnetism_a_toggled.emit())
+	btn_magnet_b.pressed.connect(func(): magnetism_b_toggled.emit())
 	btn_swap.pressed.connect(func(): swap_pressed.emit())
 
 func _show_game_over() -> void:
