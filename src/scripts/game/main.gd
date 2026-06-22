@@ -28,11 +28,13 @@ func _spawn_characters() -> void:
 	character_a = character_scene.instantiate()
 	character_a.lane = Character.Lane.TOP
 	character_a.character_polarity = Magnet.Polarity.NORTH
+	character_a.character_color = Color.DODGER_BLUE
 	add_child(character_a)
 
 	character_b = character_scene.instantiate()
 	character_b.lane = Character.Lane.BOTTOM
 	character_b.character_polarity = Magnet.Polarity.SOUTH
+	character_b.character_color = Color.ORANGE_RED
 	add_child(character_b)
 
 func _connect_input() -> void:

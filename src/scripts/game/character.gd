@@ -11,6 +11,7 @@ const CHAR_HEIGHT : float = 64.0
 @export var character_polarity : Magnet.Polarity = Magnet.Polarity.NORTH
 @export var re_center_speed : float = 100.0
 
+var character_color : Color = Color.DODGER_BLUE
 var physics_body : CustBody
 var current_surface : Surface = Surface.FLOOR
 var magnetism_active : bool = false
@@ -43,7 +44,7 @@ func _process(delta : float) -> void:
 func _draw() -> void:
 	if not is_alive:
 		return
-	var color := Color.DODGER_BLUE if lane == Lane.TOP else Color.ORANGE_RED
+	var color := character_color
 	if current_surface == Surface.CEILING:
 		color = color.lightened(0.3)
 	draw_rect(Rect2(Vector2.ZERO, Vector2(CHAR_WIDTH, CHAR_HEIGHT)), color)
