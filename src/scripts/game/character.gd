@@ -91,7 +91,7 @@ func _get_target_surface(magnet : Magnet) -> Surface:
 	if not magnet:
 		return Surface.FLOOR
 	var direction := magnet.get_force_direction(self)
-	if direction > 0:
+	if direction < 0:
 		if magnet.placement == Magnet.Placement.CEILING:
 			return Surface.CEILING
 		else:
