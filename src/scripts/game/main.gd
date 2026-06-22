@@ -51,8 +51,12 @@ func _connect_input() -> void:
 	game_hud.swap_pressed.connect(_on_swap)
 
 func _on_swap() -> void:
-	character_a.swap_lane()
-	character_b.swap_lane()
+	var tmp_color := character_a.character_color
+	var tmp_polarity := character_a.character_polarity
+	character_a.character_color = character_b.character_color
+	character_a.character_polarity = character_b.character_polarity
+	character_b.character_color = tmp_color
+	character_b.character_polarity = tmp_polarity
 
 func _process(delta : float) -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
