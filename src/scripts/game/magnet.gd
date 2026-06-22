@@ -60,7 +60,7 @@ func _update_field_aabb_at(screen_x : float) -> void:
 func is_character_in_field(character : Character) -> bool:
 	if not character or not character.physics_body:
 		return false
-	var char_aabb : CustAABB = character.physics_body.collision_box
+	var char_aabb : CustAABB = character.physics_body.get_aabb()
 	return char_aabb.overlaps(field_aabb)
 
 func get_force_direction(character : Character) -> float:

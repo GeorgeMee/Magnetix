@@ -34,13 +34,15 @@ func resolve_for_body(body : CustBody) -> void:
 		_resolve_collision(body, static_body)
 
 func _resolve_collision(dynamic : CustBody, static_body : CustBody) -> void:
-	if not dynamic.collision_box.overlaps(static_body.collision_box):
+	var d_aabb := dynamic.get_aabb()
+	var s_aabb := static_body.get_aabb()
+	if not d_aabb.overlaps(s_aabb):
 		return
 
-	var overlap_left := dynamic.collision_box.get_right() - static_body.collision_box.get_left()
-	var overlap_right := static_body.collision_box.get_right() - dynamic.collision_box.get_left()
-	var overlap_top := dynamic.collision_box.get_bottom() - static_body.collision_box.get_top()
-	var overlap_bottom := static_body.collision_box.get_bottom() - dynamic.collision_box.get_top()
+	var overlap_left := d_aabb.get_right() - s_aabb.get_left()
+	var overlap_right := s_aabb.get_right() - d_aabb.get_left()
+	var overlap_top := d_aabb.get_bottom() - s_aabb.get_top()
+	var overlap_bottom := s_aabb.get_bottom() - d_aabb.get_top()
 
 	var min_overlap_x := minf(overlap_left, overlap_right)
 	var min_overlap_y := minf(overlap_top, overlap_bottom)
@@ -59,5 +61,3 @@ func _resolve_collision(dynamic : CustBody, static_body : CustBody) -> void:
 		else:
 			dynamic.position.y += overlap_bottom
 			dynamic.on_ceiling = true
-
-	dynamic.collision_box.position = dynamic.position

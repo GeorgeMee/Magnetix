@@ -5,6 +5,7 @@ extends Node2D
 @onready var magnet_manager : MagnetManager = $MagnetManager
 @onready var input_manager : InputManager = $InputManager
 @onready var spike : Spike = $Spike
+@onready var game_hud : GameHUD = $GameHUD
 
 var character_a : Character
 var character_b : Character
@@ -40,6 +41,12 @@ func _connect_input() -> void:
 	input_manager.magnetism_b_pressed.connect(character_b.activate_magnetism)
 	input_manager.magnetism_b_released.connect(character_b.deactivate_magnetism)
 	input_manager.swap_pressed.connect(_on_swap)
+
+	game_hud.magnetism_a_pressed.connect(character_a.activate_magnetism)
+	game_hud.magnetism_a_released.connect(character_a.deactivate_magnetism)
+	game_hud.magnetism_b_pressed.connect(character_b.activate_magnetism)
+	game_hud.magnetism_b_released.connect(character_b.deactivate_magnetism)
+	game_hud.swap_pressed.connect(_on_swap)
 
 func _on_swap() -> void:
 	character_a.swap_lane()

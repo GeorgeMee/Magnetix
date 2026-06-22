@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://main"]
+[gd_scene load_steps=10 format=3 uid="uid://main"]
 
 [ext_resource type="Script" path="res://src/scripts/game/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://src/scripts/core/physics_system.gd" id="2_physics"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://src/scripts/game/input_manager.gd" id="5_input"]
 [ext_resource type="Script" path="res://src/scripts/game/spike.gd" id="6_spike"]
 [ext_resource type="Script" path="res://src/scripts/game/chunk_spawner.gd" id="7_chunk"]
+[ext_resource type="PackedScene" uid="uid://gamehud" path="res://src/scenes/ui/game_hud.tscn" id="8_hud"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -28,3 +29,5 @@ script = ExtResource("6_spike")
 
 [node name="ChunkSpawner" type="Node" parent="."]
 script = ExtResource("7_chunk")
+
+[node name="GameHUD" parent="." instance=ExtResource("8_hud")]
