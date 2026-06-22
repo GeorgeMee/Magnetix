@@ -33,12 +33,17 @@ func _spawn_chunk(world_x : float) -> void:
 		_spawn_wall(world_x + 200, 0)
 	if rng.randi_range(0, 2) == 0:
 		_spawn_wall(world_x + 300, 1)
-	if rng.randi_range(0, 1) == 0:
-		_spawn_magnet(world_x + 100, 0, Magnet.Placement.CEILING, Magnet.Polarity.NORTH, 160.0)
-	if rng.randi_range(0, 1) == 0:
-		_spawn_magnet(world_x + 100, 1, Magnet.Placement.CEILING, Magnet.Polarity.SOUTH, 160.0)
-	if rng.randi_range(0, 1) == 0:
-		_spawn_magnet(world_x + 400, 0, Magnet.Placement.FLOOR, Magnet.Polarity.SOUTH, 160.0)
+
+	var placements := [Magnet.Placement.CEILING, Magnet.Placement.FLOOR]
+	var polarities := [Magnet.Polarity.NORTH, Magnet.Polarity.SOUTH]
+
+	for lane in [0, 1]:
+		var count := rng.randi_range(1, 2)
+		for _i in range(count):
+			var offset := rng.randf_range(0, chunk_width - 200)
+			var placement := placements[rng.randi_range(0, 1)]
+			var polarity := polarities[rng.randi_range(0, 1)]
+			_spawn_magnet(world_x + offset, lane, placement, polarity, 160.0)
 
 func _spawn_wall(world_x : float, lane : int) -> void:
 	var wall := wall_scene.instantiate() as Wall

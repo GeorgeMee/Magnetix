@@ -72,22 +72,12 @@ func _update_horizontal(delta : float) -> void:
 			physics_body.position.x += signf(diff) * re_center_speed * delta
 
 func _update_vertical(delta : float) -> void:
-	var magnet := GameManager.magnet_manager.get_active_magnet_for(self)
-	var target_surface := _get_target_surface(magnet)
+	var target_surface := GameManager.magnet_manager.get_target_surface(self, magnetism_active)
 	var floor_pos := floor_y - CHAR_HEIGHT
 
-	if magnet and magnetism_active:
-		print("Magnet[%s@%s] Char[%s] same=%s → %s" % [
-			" NORTH" if magnet.polarity == Magnet.Polarity.NORTH else " SOUTH",
-			"CEIL" if magnet.placement == Magnet.Placement.CEILING else " FLR",
-			" NORTH" if character_polarity == Magnet.Polarity.NORTH else " SOUTH",
-			"SAME" if magnet.polarity == character_polarity else "DIFF",
-			"CEILING" if target_surface == Surface.CEILING else "FLOOR"
-		])
-
-	if magnet and magnetism_active and target_surface == Surface.CEILING:
+	if magnetism_active and target_surface == Surface.CEILING:
 		_move_toward_ceiling(delta)
-	elif magnet and magnetism_active and target_surface == Surface.FLOOR:
+	elif magnetism_active and target_surface == Surface.FLOOR:
 		_move_toward_floor(delta)
 	elif current_surface == Surface.CEILING:
 		_fall_to_floor(delta)
@@ -95,21 +85,6 @@ func _update_vertical(delta : float) -> void:
 		current_surface = Surface.FLOOR
 		physics_body.position.y = floor_pos
 		physics_body.velocity.y = 0
-
-func _get_target_surface(magnet : Magnet) -> Surface:
-	if not magnet:
-		return Surface.FLOOR
-	var direction := magnet.get_force_direction(self)
-	if direction < 0:
-		if magnet.placement == Magnet.Placement.CEILING:
-			return Surface.CEILING
-		else:
-			return Surface.FLOOR
-	else:
-		if magnet.placement == Magnet.Placement.FLOOR:
-			return Surface.CEILING
-		else:
-			return Surface.FLOOR
 
 func _move_toward_ceiling(delta : float) -> void:
 	if physics_body.position.y <= ceiling_y + 2.0:
