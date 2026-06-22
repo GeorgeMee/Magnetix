@@ -5,10 +5,10 @@ var world_x : float = 0.0
 var lane : int = 0
 var screen_width : float = 32.0
 var screen_height : float = 64.0
-var physics_body : PhysicsBody2D
+var physics_body : CustBody
 
 func _ready() -> void:
-	physics_body = PhysicsBody2D.new(Vector2.ZERO, Vector2(screen_width, screen_height))
+	physics_body = CustBody.new(Vector2.ZERO, Vector2(screen_width, screen_height))
 	GameManager.physics_system.register_static_body(physics_body)
 
 func _process(_delta : float) -> void:

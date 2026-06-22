@@ -12,7 +12,7 @@ enum Placement { FLOOR, CEILING }
 
 var world_x : float = 0.0
 var lane : int = 0
-var field_aabb : AABB
+var field_aabb : CustAABB
 
 func _ready() -> void:
 	if GameManager and GameManager.magnet_manager:
@@ -57,12 +57,12 @@ func update_field_aabb() -> void:
 
 func _update_field_aabb_at(screen_x : float) -> void:
 	var y := _get_screen_y() - GameManager.ceiling_offset
-	field_aabb = AABB.new(Vector2(screen_x, y), Vector2(field_length, GameManager.ceiling_offset))
+	field_aabb = CustAABB.new(Vector2(screen_x, y), Vector2(field_length, GameManager.ceiling_offset))
 
 func is_character_in_field(character : Character) -> bool:
 	if not character or not character.physics_body:
 		return false
-	var char_aabb := character.physics_body.collision_box
+	var char_aabb : CustAABB = character.physics_body.collision_box
 	return char_aabb.overlaps(field_aabb)
 
 func get_force_direction(character : Character) -> float:

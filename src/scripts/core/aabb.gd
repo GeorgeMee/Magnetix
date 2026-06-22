@@ -1,4 +1,4 @@
-class_name AABB
+class_name CustAABB
 extends RefCounted
 
 var position : Vector2
@@ -23,7 +23,7 @@ func get_bottom() -> float:
 func get_center() -> Vector2:
 	return position + size * 0.5
 
-func overlaps(other : AABB) -> bool:
+func overlaps(other : CustAABB) -> bool:
 	if get_right() <= other.get_left() or other.get_right() <= get_left():
 		return false
 	if get_bottom() <= other.get_top() or other.get_bottom() <= get_top():

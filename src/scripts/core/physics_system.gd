@@ -1,27 +1,27 @@
 class_name PhysicsSystem
 extends Node
 
-var bodies : Array[PhysicsBody2D]
-var static_bodies : Array[PhysicsBody2D]
+var bodies : Array[CustBody]
+var static_bodies : Array[CustBody]
 
 func _ready() -> void:
 	bodies = []
 	static_bodies = []
 
-func register_body(body : PhysicsBody2D) -> void:
+func register_body(body : CustBody) -> void:
 	if bodies.has(body):
 		return
 	bodies.append(body)
 
-func unregister_body(body : PhysicsBody2D) -> void:
+func unregister_body(body : CustBody) -> void:
 	bodies.erase(body)
 
-func register_static_body(body : PhysicsBody2D) -> void:
+func register_static_body(body : CustBody) -> void:
 	if static_bodies.has(body):
 		return
 	static_bodies.append(body)
 
-func unregister_static_body(body : PhysicsBody2D) -> void:
+func unregister_static_body(body : CustBody) -> void:
 	static_bodies.erase(body)
 
 func step(_delta : float) -> void:
@@ -29,11 +29,11 @@ func step(_delta : float) -> void:
 		for static_body in static_bodies:
 			_resolve_collision(body, static_body)
 
-func resolve_for_body(body : PhysicsBody2D) -> void:
+func resolve_for_body(body : CustBody) -> void:
 	for static_body in static_bodies:
 		_resolve_collision(body, static_body)
 
-func _resolve_collision(dynamic : PhysicsBody2D, static : PhysicsBody2D) -> void:
+func _resolve_collision(dynamic : CustBody, static : CustBody) -> void:
 	if not dynamic.collision_box.overlaps(static.collision_box):
 		return
 

@@ -8,7 +8,7 @@ enum Surface { FLOOR, CEILING }
 @export var character_polarity : Magnet.Polarity = Magnet.Polarity.NORTH
 @export var re_center_speed : float = 100.0
 
-var physics_body : PhysicsBody2D
+var physics_body : CustBody
 var current_surface : Surface = Surface.FLOOR
 var magnetism_active : bool = false
 var is_alive : bool = true
@@ -24,7 +24,7 @@ var gravity : float = 800.0
 func _ready() -> void:
 	default_x = GameManager.player_fixed_x
 	_setup_lane_positions()
-	physics_body = PhysicsBody2D.new(Vector2(default_x, floor_y), Vector2(48, 64))
+	physics_body = CustBody.new(Vector2(default_x, floor_y), Vector2(48, 64))
 	GameManager.physics_system.register_body(physics_body)
 
 func _process(delta : float) -> void:
