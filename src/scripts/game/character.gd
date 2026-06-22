@@ -76,6 +76,15 @@ func _update_vertical(delta : float) -> void:
 	var target_surface := _get_target_surface(magnet)
 	var floor_pos := floor_y - CHAR_HEIGHT
 
+	if magnet and magnetism_active:
+		print("Magnet[%s@%s] Char[%s] same=%s → %s" % [
+			" NORTH" if magnet.polarity == Magnet.Polarity.NORTH else " SOUTH",
+			"CEIL" if magnet.placement == Magnet.Placement.CEILING else " FLR",
+			" NORTH" if character_polarity == Magnet.Polarity.NORTH else " SOUTH",
+			"SAME" if magnet.polarity == character_polarity else "DIFF",
+			"CEILING" if target_surface == Surface.CEILING else "FLOOR"
+		])
+
 	if magnet and magnetism_active and target_surface == Surface.CEILING:
 		_move_toward_ceiling(delta)
 	elif magnet and magnetism_active and target_surface == Surface.FLOOR:
