@@ -25,14 +25,14 @@ func get_target_surface(character : Character, magnetism_active : bool) -> Chara
 		var dir := magnet.get_force_direction(character)
 		if dir < 0:
 			if magnet.placement == Magnet.Placement.CEILING:
-				has_ceiling = true
-			else:
 				has_floor = true
+			else:
+				has_ceiling = true
 		else:
 			if magnet.placement == Magnet.Placement.FLOOR:
-				has_ceiling = true
-			else:
 				has_floor = true
+			else:
+				has_ceiling = true
 	if has_ceiling:
 		return Character.Surface.CEILING
 	if has_floor:

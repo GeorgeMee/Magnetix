@@ -65,8 +65,8 @@ func is_character_in_field(character : Character) -> bool:
 
 func get_force_direction(character : Character) -> float:
 	if polarity == character.character_polarity:
-		return 1.0
-	return -1.0
+		return -1.0
+	return 1.0
 
 func get_vertical_force(character : Character) -> float:
 	var direction := get_force_direction(character)

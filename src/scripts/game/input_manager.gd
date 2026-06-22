@@ -10,6 +10,9 @@ signal swap_pressed
 var magnetism_a_held : bool = false
 var magnetism_b_held : bool = false
 
+func _ready() -> void:
+	set_process_input(true)
+
 func _input(event : InputEvent) -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
