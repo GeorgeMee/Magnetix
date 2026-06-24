@@ -59,8 +59,8 @@ func _draw() -> void:
 	_draw_lane(lane_top, coff, vp_w)
 	_draw_lane(lane_bot, coff, vp_w)
 
-	_draw_trajectory_path(lane_top, lane_bot, coff, vp_w)
-	_draw_characters(lane_top, lane_bot, coff, vp_w)
+	_draw_trajectory_path(lane_top, lane_bot, coff, vp_w, char_w, char_h)
+	_draw_characters(lane_top, lane_bot, coff, vp_w, char_w, char_h)
 
 	draw_rect(Rect2(Vector2(0, 0), Vector2(vp_w, 60)), Color(Color.BLACK, 0.6))
 	draw_string(ThemeDB.fallback_font, Vector2(20, 30), "Sim AI 轨迹  —  %d 决策点  —  间隔 %dpx" % [trajectory.size(), int(GameManager.sim_decision_interval)], HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
@@ -69,7 +69,7 @@ func _draw_lane(floor_y : float, coff : float, vp_w : float) -> void:
 	draw_line(Vector2(0, floor_y), Vector2(vp_w, floor_y), Color.WEB_GREEN, 2.0)
 	draw_line(Vector2(0, floor_y - coff), Vector2(vp_w, floor_y - coff), Color.WEB_GREEN.darkened(0.4), 1.0)
 
-func _draw_trajectory_path(lane_top : float, lane_bot : float, coff : float, vp_w : float) -> void:
+func _draw_trajectory_path(lane_top : float, lane_bot : float, coff : float, vp_w : float, char_w : float, char_h : float) -> void:
 	if trajectory.size() < 2:
 		return
 	var prev_sx : float
@@ -98,7 +98,7 @@ func _draw_trajectory_path(lane_top : float, lane_bot : float, coff : float, vp_
 		if pt.swap_trigger and sx > 0 and sx < vp_w:
 			draw_circle(Vector2(sx, lane_top - coff * 0.5), 5.0, Color.YELLOW)
 
-func _draw_characters(lane_top : float, lane_bot : float, coff : float, vp_w : float) -> void:
+func _draw_characters(lane_top : float, lane_bot : float, coff : float, vp_w : float, char_w : float, char_h : float) -> void:
 	var surf_a := _get_surface_at(sim_time, 0)
 	var surf_b := _get_surface_at(sim_time, 1)
 
