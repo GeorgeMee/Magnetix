@@ -21,7 +21,7 @@ anchor_bottom = 0.5
 offset_left = -150.0
 offset_top = -150.0
 offset_right = 150.0
-offset_bottom = 150.0
+offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -40,3 +40,8 @@ text = "开始游戏"
 unique_name_in_owner = true
 layout_mode = 2
 text = "设 置"
+
+[node name="SimPreviewButton" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Sim 预览"

@@ -22,56 +22,72 @@ func ensure_trajectory(from_world_x : float, lane_a_pol : Magnet.Polarity, lane_
 
 func get_chunk_layout(chunk_world_x : float, lane : int, chunk_width : float) -> ChunkLayout:
 	var layout := ChunkLayout.new()
-	var lane_traj : Array[Dictionary] = []
+
+	var pts_in_range : Array[TrajectoryPoint] = []
 	for pt in trajectory:
-		if pt.world_x < chunk_world_x or pt.world_x >= chunk_world_x + chunk_width:
-			continue
-		var surf := pt.char_a_surface if lane == 0 else pt.char_b_surface
-		var mag_trig := pt.magnet_a_trigger if lane == 0 else pt.magnet_b_trigger
-		lane_traj.append({"world_x": pt.world_x, "surface": surf, "mag_trigger": mag_trig, "swap": pt.swap_trigger})
+		if pt.world_x >= chunk_world_x - chunk_width and pt.world_x < chunk_world_x + chunk_width * 2:
+			pts_in_range.append(pt)
 
-	var last_surface := Character.Surface.FLOOR
-	var floor_start_x := chunk_world_x
+	if pts_in_range.size() == 0:
+		return layout
 
-	for entry in lane_traj:
-		if entry["mag_trigger"]:
-			var placement : Magnet.Placement
-			var pol : Magnet.Polarity
-			var cur_pol : Magnet.Polarity
-			if lane == 0:
-				cur_pol = GameManager.character_a.character_polarity if GameManager.character_a else Magnet.Polarity.NORTH
-			else:
-				cur_pol = GameManager.character_b.character_polarity if GameManager.character_b else Magnet.Polarity.SOUTH
-
-			if entry["surface"] == Character.Surface.CEILING:
-				placement = Magnet.Placement.FLOOR
-				pol = cur_pol
-			else:
-				placement = Magnet.Placement.CEILING
-				pol = cur_pol
-
-			layout.magnets.append({
-				"world_x": entry["world_x"],
-				"placement": placement,
-				"polarity": pol,
-				"length": 160.0
-			})
-
-		if entry["surface"] != last_surface:
-			last_surface = entry["surface"]
-
-	_layout_coins(layout, lane_traj, chunk_world_x, chunk_width)
-	_layout_walls_and_hazards(layout, lane_traj, chunk_world_x, chunk_width)
+	_place_magnets(layout, pts_in_range, lane)
+	_place_coins(layout, pts_in_range, lane, chunk_world_x, chunk_width)
+	_place_walls(layout, pts_in_range, lane, chunk_world_x, chunk_width)
+	_place_hazards(layout, pts_in_range, lane, chunk_world_x, chunk_width)
 
 	return layout
 
-func _layout_coins(layout : ChunkLayout, lane_traj : Array, chunk_start : float, chunk_width : float) -> void:
-	var coin_step := 120.0
-	var cy := 80.0
-	var x : float = chunk_start + 40.0
-	while x < chunk_start + chunk_width - 40.0:
-		x += coin_step
-		if rng.randi_range(0, 3) == 0:
+func _get_surface(pt : TrajectoryPoint, lane : int) -> int:
+	return pt.char_a_surface if lane == 0 else pt.char_b_surface
+
+func _get_cur_pol(lane : int) -> Magnet.Polarity:
+	if lane == 0:
+		return GameManager.character_a.character_polarity if GameManager.character_a else Magnet.Polarity.NORTH
+	return GameManager.character_b.character_polarity if GameManager.character_b else Magnet.Polarity.SOUTH
+
+func _place_magnets(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int) -> void:
+	var cur_pol := _get_cur_pol(lane)
+	var in_ceiling_zone := false
+	var zone_start_x : float = 0.0
+	var mag_length := GameManager.sim_decision_interval * 1.2
+
+	for i in range(pts.size()):
+		var pt := pts[i]
+		var surf := _get_surface(pt, lane)
+		var next_surf := _get_surface(pts[i + 1], lane) if i + 1 < pts.size() else surf
+
+		if surf == Character.Surface.CEILING and not in_ceiling_zone:
+			in_ceiling_zone = true
+			zone_start_x = pt.world_x
+		elif surf == Character.Surface.FLOOR and in_ceiling_zone:
+			in_ceiling_zone = false
+			var end_x := pt.world_x
+			var x := zone_start_x
+			while x < end_x:
+				var mag_x := x
+				var place_len := minf(mag_length, end_x - x)
+				var placement := Magnet.Placement.FLOOR
+				var pol := cur_pol
+				layout.magnets.append({"world_x": mag_x, "placement": placement, "polarity": pol, "length": place_len})
+				x += mag_length
+
+		if in_ceiling_zone and i == pts.size() - 1:
+			var end_x := pt.world_x + mag_length
+			var x := zone_start_x
+			while x < end_x:
+				var mag_x := x
+				layout.magnets.append({"world_x": mag_x, "placement": Magnet.Placement.FLOOR, "polarity": cur_pol, "length": minf(mag_length, end_x - x)})
+				x += mag_length
+
+func _place_coins(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int, chunk_start : float, chunk_width : float) -> void:
+	var coin_gap := 100.0
+	var y_min := 25.0
+	var y_max := GameManager.ceiling_offset - 25.0
+	var x : float = chunk_start + 30.0
+	while x < chunk_start + chunk_width - 30.0:
+		x += coin_gap
+		if rng.randi_range(0, 4) == 0:
 			continue
 		var ctype : int = Coin.Type.BLUE
 		var r := rng.randi_range(0, 9)
@@ -81,13 +97,37 @@ func _layout_coins(layout : ChunkLayout, lane_traj : Array, chunk_start : float,
 			ctype = Coin.Type.RED
 		else:
 			ctype = Coin.Type.RAINBOW
-		layout.coins.append({"world_x": x, "type": ctype, "y_off": cy + rng.randf_range(-20.0, 20.0)})
+		var y_off := rng.randf_range(y_min, y_max)
+		layout.coins.append({"world_x": x, "type": ctype, "y_off": y_off})
 
-func _layout_walls_and_hazards(layout : ChunkLayout, lane_traj : Array, chunk_start : float, chunk_width : float) -> void:
-	var has_wall := false
-	for entry in lane_traj:
-		if entry["surface"] == Character.Surface.FLOOR and not has_wall and rng.randi_range(0, 2) == 0:
-			layout.walls.append({"world_x": entry["world_x"] + 40.0})
-			has_wall = true
-		if entry["surface"] == Character.Surface.CEILING and rng.randi_range(0, 4) == 0:
-			layout.hazards.append({"world_x": entry["world_x"] + 20.0})
+func _place_walls(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int, chunk_start : float, chunk_width : float) -> void:
+	for i in range(pts.size() - 1):
+		var pt := pts[i]
+		var next_pt := pts[i + 1]
+		var surf := _get_surface(pt, lane)
+		var next_surf := _get_surface(next_pt, lane)
+
+		if surf != Character.Surface.FLOOR:
+			continue
+
+		if next_surf == Character.Surface.CEILING:
+			var wall_x := next_pt.world_x - 30.0
+			if wall_x >= chunk_start and wall_x < chunk_start + chunk_width:
+				if rng.randi_range(0, 2) > 0:
+					layout.walls.append({"world_x": wall_x})
+
+		if pt.world_x < chunk_start or pt.world_x >= chunk_start + chunk_width:
+			continue
+
+		var floor_duration := next_pt.world_x - pt.world_x
+		if floor_duration > GameManager.sim_decision_interval * 1.8 and next_surf == Character.Surface.FLOOR:
+			if rng.randi_range(0, 1) == 0:
+				layout.walls.append({"world_x": pt.world_x + floor_duration * 0.7})
+
+func _place_hazards(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int, chunk_start : float, chunk_width : float) -> void:
+	for pt in pts:
+		if pt.world_x < chunk_start or pt.world_x >= chunk_start + chunk_width:
+			continue
+		var surf := _get_surface(pt, lane)
+		if surf == Character.Surface.CEILING and rng.randi_range(0, 3) == 0:
+			layout.hazards.append({"world_x": pt.world_x + 20.0})

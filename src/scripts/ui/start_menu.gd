@@ -6,9 +6,13 @@ func _ready() -> void:
 	GameManager.state = GameManager.GameState.MENU
 	%StartButton.pressed.connect(_on_start)
 	%SettingsButton.pressed.connect(_on_settings)
+	%SimPreviewButton.pressed.connect(_on_sim_preview)
 
 func _on_start() -> void:
 	get_tree().change_scene_to_file("res://src/scenes/main/main.tscn")
+
+func _on_sim_preview() -> void:
+	get_tree().change_scene_to_file("res://src/scenes/ui/sim_preview.tscn")
 
 func _on_settings() -> void:
 	if settings_panel:
