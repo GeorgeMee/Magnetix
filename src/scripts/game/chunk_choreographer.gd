@@ -84,8 +84,6 @@ func _place_magnets_with_pol(layout : ChunkLayout, pts : Array[TrajectoryPoint],
 
 func _place_coins(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int, chunk_start : float, chunk_width : float) -> void:
 	var coin_gap := 100.0
-	var y_min := 25.0
-	var y_max := GameManager.ceiling_offset - 25.0
 	var x : float = chunk_start + 30.0
 	while x < chunk_start + chunk_width - 30.0:
 		x += coin_gap
@@ -99,7 +97,14 @@ func _place_coins(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int
 			ctype = Coin.Type.RED
 		else:
 			ctype = Coin.Type.RAINBOW
-		var y_off := rng.randf_range(y_min, y_max)
+		var surf := Character.Surface.FLOOR
+		for pt in pts:
+			if pt.world_x > x:
+				break
+			surf = _get_surface(pt, lane)
+		var base_y := 15.0 if surf == Character.Surface.FLOOR else GameManager.ceiling_offset - 15.0
+		var y_off := base_y + rng.randf_range(-20.0, 20.0)
+		y_off = clampf(y_off, 15.0, GameManager.ceiling_offset - 15.0)
 		layout.coins.append({"world_x": x, "type": ctype, "y_off": y_off})
 
 func _place_walls(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int, chunk_start : float, chunk_width : float) -> void:

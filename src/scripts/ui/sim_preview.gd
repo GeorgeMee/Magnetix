@@ -9,14 +9,13 @@ var sim_speed : float = 100.0
 var playing : bool = true
 var total_length : float = 5000.0
 var char_x : float = 400.0
-var transition_dist : float = 260.0
+var transition_dist : float = 90.0
 var last_surf_a := SimAI.Surface.FLOOR
 var last_surf_b := SimAI.Surface.FLOOR
 var last_flip_time_a : float = -9999.0
 var last_flip_time_b : float = -9999.0
 var prev_surf_a := SimAI.Surface.FLOOR
 var prev_surf_b := SimAI.Surface.FLOOR
-var prev_check_time : float = -9999.0
 
 var layout_cache : Array[Dictionary] = []
 
@@ -42,7 +41,6 @@ func _regenerate() -> void:
 	last_flip_time_b = -9999.0
 	prev_surf_a = SimAI.Surface.FLOOR
 	prev_surf_b = SimAI.Surface.FLOOR
-	prev_check_time = -9999.0
 	_build_layouts()
 
 func _build_layouts() -> void:
@@ -63,20 +61,17 @@ func _process(delta : float) -> void:
 			sim_time -= total_length
 			last_flip_time_a -= total_length
 			last_flip_time_b -= total_length
-			prev_check_time -= total_length
 
-		if sim_time - prev_check_time > 0.05:
-			var cur_a := _get_surface_at(sim_time, 0)
-			var cur_b := _get_surface_at(sim_time, 1)
-			if cur_a != prev_surf_a:
-				last_flip_time_a = sim_time
-				last_surf_a = prev_surf_a
-			if cur_b != prev_surf_b:
-				last_flip_time_b = sim_time
-				last_surf_b = prev_surf_b
-			prev_surf_a = cur_a
-			prev_surf_b = cur_b
-			prev_check_time = sim_time
+		var cur_a := _get_surface_at(sim_time, 0)
+		var cur_b := _get_surface_at(sim_time, 1)
+		if cur_a != prev_surf_a:
+			last_flip_time_a = sim_time
+			last_surf_a = prev_surf_a
+		if cur_b != prev_surf_b:
+			last_flip_time_b = sim_time
+			last_surf_b = prev_surf_b
+		prev_surf_a = cur_a
+		prev_surf_b = cur_b
 	queue_redraw()
 
 func _on_speed_changed(value : float) -> void:
@@ -107,7 +102,6 @@ func _smooth_feet_y(floor_y : float, coff : float, char_h : float, lane : int) -
 	if elapsed >= transition_dist or elapsed < 0.0:
 		return target_y
 	var progress := clampf(elapsed / transition_dist, 0.0, 1.0)
-	progress = ease(progress, 0.5)
 	var old_y := _feet_y_at(floor_y, coff, old_surf)
 	return lerpf(old_y, target_y, progress)
 
@@ -214,8 +208,8 @@ func _draw_trajectory_path(lane_top : float, lane_bot : float, coff : float, vp_
 	for i in range(trajectory.size() - 1):
 		var pt0 := trajectory[i]
 		var pt1 := trajectory[i + 1]
-		for s in range(6):
-			var t := float(s) / 6.0
+		for s in range(10):
+			var t := float(s) / 10.0
 			var wx := lerpf(pt0.world_x, pt1.world_x, t)
 			var sx := char_x + (wx - sim_time)
 			if sx < -200 or sx > vp_w + 200:
@@ -224,8 +218,8 @@ func _draw_trajectory_path(lane_top : float, lane_bot : float, coff : float, vp_
 			var fy_a := _feet_y_at(lane_top, coff, pt0.char_a_surface)
 			var fy_b := _feet_y_at(lane_bot, coff, pt0.char_b_surface)
 			if not first and sx > prev_sx - 5:
-				draw_line(Vector2(prev_sx, prev_fy_a), Vector2(sx, fy_a), Color(Color.DODGER_BLUE, 0.3), 2.0)
-				draw_line(Vector2(prev_sx, prev_fy_b), Vector2(sx, fy_b), Color(Color.ORANGE_RED, 0.3), 2.0)
+				draw_line(Vector2(prev_sx, prev_fy_a), Vector2(sx, fy_a), Color(Color.DODGER_BLUE, 0.15), 2.0)
+				draw_line(Vector2(prev_sx, prev_fy_b), Vector2(sx, fy_b), Color(Color.ORANGE_RED, 0.15), 2.0)
 			prev_sx = sx
 			prev_fy_a = fy_a
 			prev_fy_b = fy_b
