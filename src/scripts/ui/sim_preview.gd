@@ -2,6 +2,7 @@ class_name SimPreview
 extends Node2D
 
 var sim_ai : SimAI
+var choreographer : ChunkChoreographer
 var trajectory : Array[TrajectoryPoint] = []
 var sim_time : float = 0.0
 var sim_speed : float = 100.0
@@ -17,12 +18,16 @@ var prev_surf_a := SimAI.Surface.FLOOR
 var prev_surf_b := SimAI.Surface.FLOOR
 var prev_check_time : float = -9999.0
 
+var layout_cache : Array[Dictionary] = []
+
 @onready var speed_slider : HSlider = %SpeedSlider
 @onready var speed_label : Label = %SpeedLabel
 @onready var btn_play : Button = %BtnPlay
 
 func _ready() -> void:
 	sim_ai = SimAI.new()
+	choreographer = ChunkChoreographer.new()
+	add_child(choreographer)
 	_regenerate()
 	speed_slider.value = sim_speed
 	speed_slider.value_changed.connect(_on_speed_changed)
@@ -38,10 +43,21 @@ func _regenerate() -> void:
 	prev_surf_a = SimAI.Surface.FLOOR
 	prev_surf_b = SimAI.Surface.FLOOR
 	prev_check_time = -9999.0
+	_build_layouts()
+
+func _build_layouts() -> void:
+	layout_cache.clear()
+	var chunk_w := GameManager.chunk_width
+	var num_chunks := int(ceilf(total_length / chunk_w))
+	for ci in range(num_chunks):
+		var wx := float(ci) * chunk_w
+		for lane in [0, 1]:
+			var pol := Magnet.Polarity.NORTH if lane == 0 else Magnet.Polarity.SOUTH
+			var layout := choreographer.build_layout(trajectory, wx, lane, chunk_w, pol)
+			layout_cache.append({"lane": lane, "layout": layout})
 
 func _process(delta : float) -> void:
 	if playing:
-		var prev_time := sim_time
 		sim_time += sim_speed * delta
 		if sim_time > total_length:
 			sim_time -= total_length
@@ -87,11 +103,9 @@ func _smooth_feet_y(floor_y : float, coff : float, char_h : float, lane : int) -
 	var target_y := _feet_y_at(floor_y, coff, surf)
 	var last_flip := last_flip_time_a if lane == 0 else last_flip_time_b
 	var old_surf := last_surf_a if lane == 0 else last_surf_b
-
 	var elapsed := sim_time - last_flip
 	if elapsed >= transition_dist or elapsed < 0.0:
 		return target_y
-
 	var progress := clampf(elapsed / transition_dist, 0.0, 1.0)
 	progress = ease(progress, 0.5)
 	var old_y := _feet_y_at(floor_y, coff, old_surf)
@@ -108,6 +122,7 @@ func _draw() -> void:
 
 	_draw_lane(lane_top, coff, vp_w)
 	_draw_lane(lane_bot, coff, vp_w)
+	_draw_level(lane_top, lane_bot, coff, vp_w)
 	_draw_trajectory_path(lane_top, lane_bot, coff, vp_w, char_h)
 	_draw_characters(lane_top, lane_bot, coff, vp_w, char_w, char_h)
 
@@ -117,6 +132,73 @@ func _draw() -> void:
 func _draw_lane(floor_y : float, coff : float, vp_w : float) -> void:
 	draw_line(Vector2(0, floor_y), Vector2(vp_w, floor_y), Color.WEB_GREEN, 2.0)
 	draw_line(Vector2(0, floor_y - coff), Vector2(vp_w, floor_y - coff), Color.WEB_GREEN.darkened(0.4), 1.0)
+
+func _draw_level(lane_top : float, lane_bot : float, coff : float, vp_w : float) -> void:
+	var vis_start_x := sim_time - char_x
+	var vis_end_x := sim_time + vp_w - char_x
+	for entry in layout_cache:
+		var layout := entry["layout"] as ChunkLayout
+		var lane_y := lane_top if entry["lane"] == 0 else lane_bot
+		_draw_magnets_in_layout(layout, lane_y, coff, vp_w, vis_start_x, vis_end_x)
+		_draw_walls_in_layout(layout, lane_y, vp_w, vis_start_x, vis_end_x)
+		_draw_coins_in_layout(layout, lane_y, vp_w, vis_start_x, vis_end_x)
+		_draw_hazards_in_layout(layout, lane_y, vp_w, vis_start_x, vis_end_x)
+
+func _world_to_sx(wx : float) -> float:
+	return char_x + (wx - sim_time)
+
+func _in_view(sx : float, vp_w : float) -> bool:
+	return sx > -50 and sx < vp_w + 50
+
+func _draw_magnets_in_layout(layout : ChunkLayout, lane_y : float, coff : float, vp_w : float, vx0 : float, vx1 : float) -> void:
+	for m in layout.magnets:
+		if m["world_x"] < vx0 - 200 or m["world_x"] > vx1 + 200:
+			continue
+		var sx := _world_to_sx(m["world_x"])
+		var sy : float
+		if m["placement"] == Magnet.Placement.CEILING:
+			sy = lane_y - coff
+		else:
+			sy = lane_y - 16
+		var len := m["length"] as float
+		var col := Color.BLUE if m["polarity"] == Magnet.Polarity.NORTH else Color.RED
+		draw_rect(Rect2(Vector2(sx, sy), Vector2(len, 16.0)), col, true)
+
+func _draw_walls_in_layout(layout : ChunkLayout, lane_y : float, vp_w : float, vx0 : float, vx1 : float) -> void:
+	for w in layout.walls:
+		if w["world_x"] < vx0 - 200 or w["world_x"] > vx1 + 200:
+			continue
+		var sx := _world_to_sx(w["world_x"])
+		var sy := lane_y - 64.0
+		draw_rect(Rect2(Vector2(sx, sy), Vector2(32.0, 64.0)), Color.DIM_GRAY)
+		draw_rect(Rect2(Vector2(sx, sy), Vector2(32.0, 64.0)), Color.BLACK, false, 2.0)
+
+func _draw_coins_in_layout(layout : ChunkLayout, lane_y : float, vp_w : float, vx0 : float, vx1 : float) -> void:
+	for c in layout.coins:
+		if c["world_x"] < vx0 - 200 or c["world_x"] > vx1 + 200:
+			continue
+		var sx := _world_to_sx(c["world_x"])
+		var sy := lane_y - c["y_off"]
+		var col := Color.DODGER_BLUE
+		var ct = c["type"]
+		if ct == Coin.Type.RED:
+			col = Color.ORANGE_RED
+		elif ct == Coin.Type.RAINBOW:
+			col = Color.from_hsv(fmod(sx * 0.01, 1.0), 1.0, 1.0)
+		var h := 8.0
+		var p := PackedVector2Array([Vector2(-h, 0), Vector2(0, h), Vector2(h, 0), Vector2(0, -h)])
+		for i in range(4):
+			p[i] += Vector2(sx, sy)
+		draw_colored_polygon(p, col)
+
+func _draw_hazards_in_layout(layout : ChunkLayout, lane_y : float, vp_w : float, vx0 : float, vx1 : float) -> void:
+	for h in layout.hazards:
+		if h["world_x"] < vx0 - 200 or h["world_x"] > vx1 + 200:
+			continue
+		var sx := _world_to_sx(h["world_x"])
+		var sy := lane_y - 64.0
+		var p := PackedVector2Array([Vector2(sx, sy + 64), Vector2(sx + 16, sy), Vector2(sx + 32, sy + 64)])
+		draw_colored_polygon(p, Color.RED.darkened(0.3))
 
 func _draw_trajectory_path(lane_top : float, lane_bot : float, coff : float, vp_w : float, char_h : float) -> void:
 	if trajectory.size() < 2:
@@ -181,10 +263,8 @@ func _draw_characters(lane_top : float, lane_bot : float, coff : float, vp_w : f
 	var light_a := Color.DODGER_BLUE.lightened(0.3)
 	var light_b := Color.ORANGE_RED.lightened(0.3)
 
-	# Draw A
 	draw_rect(Rect2(Vector2(char_x, ay), Vector2(char_w, char_h)), color_a if not flip_a else light_a)
 	draw_rect(Rect2(Vector2(char_x, ay), Vector2(char_w, char_h)), Color.BLACK, false, 2.0)
-	# Feet marker
 	if flip_a:
 		draw_line(Vector2(char_x, ay), Vector2(char_x + char_w, ay), Color.RED, 2.0)
 		draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, ay + 4), "A", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
@@ -192,7 +272,6 @@ func _draw_characters(lane_top : float, lane_bot : float, coff : float, vp_w : f
 		draw_line(Vector2(char_x, ay + char_h), Vector2(char_x + char_w, ay + char_h), Color.RED, 2.0)
 		draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, ay + char_h - 12), "A", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
 
-	# Draw B
 	draw_rect(Rect2(Vector2(char_x, by), Vector2(char_w, char_h)), color_b if not flip_b else light_b)
 	draw_rect(Rect2(Vector2(char_x, by), Vector2(char_w, char_h)), Color.BLACK, false, 2.0)
 	if flip_b:

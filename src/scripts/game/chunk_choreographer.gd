@@ -21,17 +21,21 @@ func ensure_trajectory(from_world_x : float, lane_a_pol : Magnet.Polarity, lane_
 	trajectory = sim_ai.generate(lane_a_pol, lane_b_pol, start_x, needed_length, GameManager.sim_decision_interval)
 
 func get_chunk_layout(chunk_world_x : float, lane : int, chunk_width : float) -> ChunkLayout:
+	var pol := _get_cur_pol(lane)
+	return build_layout(trajectory, chunk_world_x, lane, chunk_width, pol)
+
+func build_layout(traj : Array[TrajectoryPoint], chunk_world_x : float, lane : int, chunk_width : float, pol : Magnet.Polarity) -> ChunkLayout:
 	var layout := ChunkLayout.new()
 
 	var pts_in_range : Array[TrajectoryPoint] = []
-	for pt in trajectory:
+	for pt in traj:
 		if pt.world_x >= chunk_world_x - chunk_width and pt.world_x < chunk_world_x + chunk_width * 2:
 			pts_in_range.append(pt)
 
 	if pts_in_range.size() == 0:
 		return layout
 
-	_place_magnets(layout, pts_in_range, lane)
+	_place_magnets_with_pol(layout, pts_in_range, lane, pol)
 	_place_coins(layout, pts_in_range, lane, chunk_world_x, chunk_width)
 	_place_walls(layout, pts_in_range, lane, chunk_world_x, chunk_width)
 	_place_hazards(layout, pts_in_range, lane, chunk_world_x, chunk_width)
@@ -46,8 +50,7 @@ func _get_cur_pol(lane : int) -> Magnet.Polarity:
 		return GameManager.character_a.character_polarity if GameManager.character_a else Magnet.Polarity.NORTH
 	return GameManager.character_b.character_polarity if GameManager.character_b else Magnet.Polarity.SOUTH
 
-func _place_magnets(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int) -> void:
-	var cur_pol := _get_cur_pol(lane)
+func _place_magnets_with_pol(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int, pol : Magnet.Polarity) -> void:
 	var in_ceiling_zone := false
 	var zone_start_x : float = 0.0
 	var mag_length := GameManager.sim_decision_interval * 1.2
@@ -68,7 +71,6 @@ func _place_magnets(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : i
 				var mag_x := x
 				var place_len := minf(mag_length, end_x - x)
 				var placement := Magnet.Placement.FLOOR
-				var pol := cur_pol
 				layout.magnets.append({"world_x": mag_x, "placement": placement, "polarity": pol, "length": place_len})
 				x += mag_length
 
@@ -77,7 +79,7 @@ func _place_magnets(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : i
 			var x := zone_start_x
 			while x < end_x:
 				var mag_x := x
-				layout.magnets.append({"world_x": mag_x, "placement": Magnet.Placement.FLOOR, "polarity": cur_pol, "length": minf(mag_length, end_x - x)})
+				layout.magnets.append({"world_x": mag_x, "placement": Magnet.Placement.FLOOR, "polarity": pol, "length": minf(mag_length, end_x - x)})
 				x += mag_length
 
 func _place_coins(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int, chunk_start : float, chunk_width : float) -> void:
