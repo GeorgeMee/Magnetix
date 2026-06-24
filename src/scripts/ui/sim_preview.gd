@@ -8,6 +8,10 @@ var sim_speed : float = 100.0
 var playing : bool = true
 var total_length : float = 5000.0
 var char_x : float = 400.0
+var transition_dist : float = 260.0
+
+var char_a_display_y : float = 0.0
+var char_b_display_y : float = 0.0
 
 @onready var speed_slider : HSlider = %SpeedSlider
 @onready var speed_label : Label = %SpeedLabel
@@ -23,12 +27,16 @@ func _ready() -> void:
 func _regenerate() -> void:
 	trajectory = sim_ai.generate(Magnet.Polarity.NORTH, Magnet.Polarity.SOUTH, 100.0, total_length, GameManager.sim_decision_interval)
 	sim_time = 0.0
+	char_a_display_y = 0.0
+	char_b_display_y = 0.0
 
 func _process(delta : float) -> void:
 	if playing:
 		sim_time += sim_speed * delta
 		if sim_time > total_length:
 			sim_time -= total_length
+			char_a_display_y = 0.0
+			char_b_display_y = 0.0
 	queue_redraw()
 
 func _on_speed_changed(value : float) -> void:
@@ -43,7 +51,7 @@ func _feet_y_at(floor_y : float, coff : float, surf : int) -> float:
 	return floor_y if surf == SimAI.Surface.FLOOR else floor_y - coff
 
 func _rect_y_at(floor_y : float, coff : float, char_h : float, surf : int) -> float:
-	return floor_y - char_h if surf == SimAI.Surface.FLOOR else floor_y - coff - char_h
+	return floor_y - char_h if surf == SimAI.Surface.FLOOR else floor_y - coff
 
 func _get_surface_at(world_x : float, lane : int) -> int:
 	var current := SimAI.Surface.FLOOR
@@ -52,6 +60,33 @@ func _get_surface_at(world_x : float, lane : int) -> int:
 			break
 		current = trajectory[i].char_a_surface if lane == 0 else trajectory[i].char_b_surface
 	return current
+
+func _get_prev_flip_x(world_x : float, lane : int) -> float:
+	var last_x : float = 0.0
+	var last_surf := SimAI.Surface.FLOOR
+	for i in range(trajectory.size()):
+		if trajectory[i].world_x > world_x:
+			break
+		var s := trajectory[i].char_a_surface if lane == 0 else trajectory[i].char_b_surface
+		if s != last_surf:
+			last_x = trajectory[i].world_x
+			last_surf = s
+	return last_x
+
+func _smooth_feet_y(floor_y : float, coff : float, char_h : float, lane : int) -> float:
+	var surf := _get_surface_at(sim_time, lane)
+	var prev_surf := _get_surface_at(sim_time - 0.01, lane)
+	var target_y := _feet_y_at(floor_y, coff, surf)
+
+	if surf == prev_surf:
+		return target_y
+
+	var flip_x := _get_prev_flip_x(sim_time, lane)
+	var progress := clampf((sim_time - flip_x) / transition_dist, 0.0, 1.0)
+	progress = ease(progress, 0.5)
+
+	var old_y := _feet_y_at(floor_y, coff, prev_surf)
+	return lerpf(old_y, target_y, progress)
 
 func _draw() -> void:
 	var vp_w := get_viewport().get_visible_rect().size.x
@@ -64,7 +99,7 @@ func _draw() -> void:
 
 	_draw_lane(lane_top, coff, vp_w)
 	_draw_lane(lane_bot, coff, vp_w)
-	_draw_trajectory_path(lane_top, lane_bot, coff, vp_w, char_w, char_h)
+	_draw_trajectory_path(lane_top, lane_bot, coff, vp_w, char_h)
 	_draw_characters(lane_top, lane_bot, coff, vp_w, char_w, char_h)
 
 	draw_rect(Rect2(Vector2(0, 0), Vector2(vp_w, 60)), Color(Color.BLACK, 0.6))
@@ -74,25 +109,22 @@ func _draw_lane(floor_y : float, coff : float, vp_w : float) -> void:
 	draw_line(Vector2(0, floor_y), Vector2(vp_w, floor_y), Color.WEB_GREEN, 2.0)
 	draw_line(Vector2(0, floor_y - coff), Vector2(vp_w, floor_y - coff), Color.WEB_GREEN.darkened(0.4), 1.0)
 
-func _draw_trajectory_path(lane_top : float, lane_bot : float, coff : float, vp_w : float, char_w : float, char_h : float) -> void:
+func _draw_trajectory_path(lane_top : float, lane_bot : float, coff : float, vp_w : float, char_h : float) -> void:
 	if trajectory.size() < 2:
 		return
 	var prev_sx : float = 0.0
 	var prev_fy_a : float = 0.0
 	var prev_fy_b : float = 0.0
 	var first := true
-	var substeps := 4
 	for i in range(trajectory.size() - 1):
 		var pt0 := trajectory[i]
 		var pt1 := trajectory[i + 1]
-		for s in range(substeps):
-			var t := float(s) / float(substeps)
+		for s in range(6):
+			var t := float(s) / 6.0
 			var wx := lerpf(pt0.world_x, pt1.world_x, t)
 			var sx := char_x + (wx - sim_time)
 			if sx < -200 or sx > vp_w + 200:
 				prev_sx = sx
-				prev_fy_a = _feet_y_at(lane_top, coff, pt0.char_a_surface)
-				prev_fy_b = _feet_y_at(lane_bot, coff, pt0.char_b_surface)
 				continue
 			var fy_a := _feet_y_at(lane_top, coff, pt0.char_a_surface)
 			var fy_b := _feet_y_at(lane_bot, coff, pt0.char_b_surface)
@@ -108,33 +140,58 @@ func _draw_trajectory_path(lane_top : float, lane_bot : float, coff : float, vp_
 		var sx := char_x + (pt.world_x - sim_time)
 		if sx > 0 and sx < vp_w:
 			if pt.swap_trigger:
-				draw_circle(Vector2(sx, lane_top - coff * 0.5), 5.0, Color.YELLOW)
+				draw_circle(Vector2(sx, lane_top - coff * 0.5), 6.0, Color.YELLOW)
 			if pt.magnet_a_trigger:
-				draw_circle(Vector2(sx, _feet_y_at(lane_top, coff, pt.char_a_surface) - 8), 3.0, Color.WHITE)
+				draw_circle(Vector2(sx, _feet_y_at(lane_top, coff, pt.char_a_surface) - 10), 4.0, Color.WHITE)
 			if pt.magnet_b_trigger:
-				draw_circle(Vector2(sx, _feet_y_at(lane_bot, coff, pt.char_b_surface) - 8), 3.0, Color.WHITE)
+				draw_circle(Vector2(sx, _feet_y_at(lane_bot, coff, pt.char_b_surface) - 10), 4.0, Color.WHITE)
 
 func _draw_characters(lane_top : float, lane_bot : float, coff : float, vp_w : float, char_w : float, char_h : float) -> void:
-	var surf_a := _get_surface_at(sim_time, 0)
-	var surf_b := _get_surface_at(sim_time, 1)
+	var fy_a := _smooth_feet_y(lane_top, coff, char_h, 0)
+	var fy_b := _smooth_feet_y(lane_bot, coff, char_h, 1)
 
-	var ay := _rect_y_at(lane_top, coff, char_h, surf_a)
-	var by := _rect_y_at(lane_bot, coff, char_h, surf_b)
+	var ay : float
+	var by : float
+	var flip_a := false
+	var flip_b := false
+
+	if fy_a < lane_top - coff * 0.5:
+		flip_a = true
+		ay = fy_a
+	else:
+		ay = fy_a - char_h
+
+	if fy_b < lane_bot - coff * 0.5:
+		flip_b = true
+		by = fy_b
+	else:
+		by = fy_b - char_h
 
 	var color_a := Color.DODGER_BLUE
 	var color_b := Color.ORANGE_RED
-	if surf_a == SimAI.Surface.CEILING:
-		color_a = color_a.lightened(0.3)
-	if surf_b == SimAI.Surface.CEILING:
-		color_b = color_b.lightened(0.3)
+	var light_a := Color.DODGER_BLUE.lightened(0.3)
+	var light_b := Color.ORANGE_RED.lightened(0.3)
 
-	draw_rect(Rect2(Vector2(char_x, ay), Vector2(char_w, char_h)), color_a)
+	# Draw A
+	draw_rect(Rect2(Vector2(char_x, ay), Vector2(char_w, char_h)), color_a if not flip_a else light_a)
 	draw_rect(Rect2(Vector2(char_x, ay), Vector2(char_w, char_h)), Color.BLACK, false, 2.0)
-	draw_rect(Rect2(Vector2(char_x, by), Vector2(char_w, char_h)), color_b)
-	draw_rect(Rect2(Vector2(char_x, by), Vector2(char_w, char_h)), Color.BLACK, false, 2.0)
+	# Feet marker
+	if flip_a:
+		draw_line(Vector2(char_x, ay), Vector2(char_x + char_w, ay), Color.RED, 2.0)
+		draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, ay + 4), "A", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
+	else:
+		draw_line(Vector2(char_x, ay + char_h), Vector2(char_x + char_w, ay + char_h), Color.RED, 2.0)
+		draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, ay + char_h - 12), "A", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
 
-	draw_string(ThemeDB.fallback_font, Vector2(char_x, ay - 16), "A", HORIZONTAL_ALIGNMENT_CENTER, -1, 12)
-	draw_string(ThemeDB.fallback_font, Vector2(char_x, by - 16), "B", HORIZONTAL_ALIGNMENT_CENTER, -1, 12)
+	# Draw B
+	draw_rect(Rect2(Vector2(char_x, by), Vector2(char_w, char_h)), color_b if not flip_b else light_b)
+	draw_rect(Rect2(Vector2(char_x, by), Vector2(char_w, char_h)), Color.BLACK, false, 2.0)
+	if flip_b:
+		draw_line(Vector2(char_x, by), Vector2(char_x + char_w, by), Color.RED, 2.0)
+		draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, by + 4), "B", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
+	else:
+		draw_line(Vector2(char_x, by + char_h), Vector2(char_x + char_w, by + char_h), Color.RED, 2.0)
+		draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, by + char_h - 12), "B", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
 
 func _input(event : InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
