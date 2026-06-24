@@ -11,10 +11,10 @@ var lane_bottom_scroll_speed : float = 200.0
 var base_scroll_speed : float = 200.0
 var scroll_acceleration : float = 5.0
 
-var player_fixed_x : float = 300.0
-var lane_top_y : float = 0.0
-var lane_bottom_y : float = 0.0
-var ceiling_offset : float = 120.0
+var player_fixed_x : float = 500.0
+var lane_top_y : float = 300.0
+var lane_bottom_y : float = 750.0
+var ceiling_offset : float = 180.0
 
 var physics_system : PhysicsSystem
 var scroll_manager : ScrollManager

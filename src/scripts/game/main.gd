@@ -16,10 +16,6 @@ func _ready() -> void:
 	GameManager.physics_system = physics_system
 	GameManager.scroll_manager = scroll_manager
 	GameManager.magnet_manager = magnet_manager
-	GameManager.lane_top_y = 300.0
-	GameManager.lane_bottom_y = 750.0
-	GameManager.ceiling_offset = 180.0
-	GameManager.player_fixed_x = 500.0
 	GameManager.choreographer = choreographer
 
 	_spawn_characters()

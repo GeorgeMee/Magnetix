@@ -16,9 +16,15 @@ func ensure_trajectory(from_world_x : float, lane_a_pol : Magnet.Polarity, lane_
 	if trajectory.size() > 0 and trajectory[-1].world_x >= needed_end:
 		return
 	var start_x := from_world_x
+	var surf_a := SimAI.Surface.FLOOR
+	var surf_b := SimAI.Surface.FLOOR
 	if trajectory.size() > 0:
-		start_x = maxf(trajectory[-1].world_x, from_world_x)
-	trajectory = sim_ai.generate(lane_a_pol, lane_b_pol, start_x, needed_length, GameManager.sim_decision_interval)
+		var last_pt := trajectory[-1]
+		start_x = maxf(last_pt.world_x + GameManager.sim_decision_interval, from_world_x)
+		surf_a = last_pt.char_a_surface as int
+		surf_b = last_pt.char_b_surface as int
+	var new_points := sim_ai.generate(lane_a_pol, lane_b_pol, start_x, needed_end - start_x, GameManager.sim_decision_interval, surf_a, surf_b)
+	trajectory.append_array(new_points)
 
 func get_chunk_layout(chunk_world_x : float, lane : int, chunk_width : float) -> ChunkLayout:
 	var pol := _get_cur_pol(lane)
@@ -116,7 +122,7 @@ func _place_walls(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int
 			continue
 
 		if next_surf == Character.Surface.CEILING:
-			var wall_x := next_pt.world_x - 30.0
+			var wall_x := next_pt.world_x + 60.0
 			if wall_x >= chunk_start and wall_x < chunk_start + chunk_width:
 				if rng.randi_range(0, 2) > 0:
 					layout.walls.append({"world_x": wall_x})

@@ -5,14 +5,14 @@ enum Surface { FLOOR, CEILING }
 
 var rng : RandomNumberGenerator
 
-func generate(initial_a_pol : Magnet.Polarity, initial_b_pol : Magnet.Polarity, start_world_x : float, length : float, interval : float) -> Array[TrajectoryPoint]:
+func generate(initial_a_pol : Magnet.Polarity, initial_b_pol : Magnet.Polarity, start_world_x : float, length : float, interval : float, start_surf_a := Surface.FLOOR, start_surf_b := Surface.FLOOR) -> Array[TrajectoryPoint]:
 	rng = RandomNumberGenerator.new()
 	rng.randomize()
 
 	var points : Array[TrajectoryPoint] = []
 	var current_x := start_world_x
-	var surf_a := Surface.FLOOR
-	var surf_b := Surface.FLOOR
+	var surf_a := start_surf_a
+	var surf_b := start_surf_b
 	var last_lane := -1
 
 	while current_x < start_world_x + length:
