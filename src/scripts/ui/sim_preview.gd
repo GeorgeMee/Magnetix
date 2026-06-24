@@ -152,35 +152,38 @@ func _in_view(sx : float, vp_w : float) -> bool:
 
 func _draw_magnets_in_layout(layout : ChunkLayout, lane_y : float, coff : float, vp_w : float, vx0 : float, vx1 : float) -> void:
 	for m in layout.magnets:
-		if m["world_x"] < vx0 - 200 or m["world_x"] > vx1 + 200:
+		var wx : float = m["world_x"]
+		if wx < vx0 - 200 or wx > vx1 + 200:
 			continue
-		var sx := _world_to_sx(m["world_x"])
+		var sx := _world_to_sx(wx)
 		var sy : float
 		if m["placement"] == Magnet.Placement.CEILING:
 			sy = lane_y - coff
 		else:
 			sy = lane_y - 16
-		var len := m["length"] as float
+		var len : float = m["length"]
 		var col := Color.BLUE if m["polarity"] == Magnet.Polarity.NORTH else Color.RED
 		draw_rect(Rect2(Vector2(sx, sy), Vector2(len, 16.0)), col, true)
 
 func _draw_walls_in_layout(layout : ChunkLayout, lane_y : float, vp_w : float, vx0 : float, vx1 : float) -> void:
 	for w in layout.walls:
-		if w["world_x"] < vx0 - 200 or w["world_x"] > vx1 + 200:
+		var wx : float = w["world_x"]
+		if wx < vx0 - 200 or wx > vx1 + 200:
 			continue
-		var sx := _world_to_sx(w["world_x"])
+		var sx := _world_to_sx(wx)
 		var sy := lane_y - 64.0
 		draw_rect(Rect2(Vector2(sx, sy), Vector2(32.0, 64.0)), Color.DIM_GRAY)
 		draw_rect(Rect2(Vector2(sx, sy), Vector2(32.0, 64.0)), Color.BLACK, false, 2.0)
 
 func _draw_coins_in_layout(layout : ChunkLayout, lane_y : float, vp_w : float, vx0 : float, vx1 : float) -> void:
 	for c in layout.coins:
-		if c["world_x"] < vx0 - 200 or c["world_x"] > vx1 + 200:
+		var cx : float = c["world_x"]
+		if cx < vx0 - 200 or cx > vx1 + 200:
 			continue
-		var sx := _world_to_sx(c["world_x"])
-		var sy := lane_y - c["y_off"]
+		var sx := _world_to_sx(cx)
+		var sy : float = lane_y - (c["y_off"] as float)
 		var col := Color.DODGER_BLUE
-		var ct = c["type"]
+		var ct : int = c["type"]
 		if ct == Coin.Type.RED:
 			col = Color.ORANGE_RED
 		elif ct == Coin.Type.RAINBOW:
@@ -193,9 +196,10 @@ func _draw_coins_in_layout(layout : ChunkLayout, lane_y : float, vp_w : float, v
 
 func _draw_hazards_in_layout(layout : ChunkLayout, lane_y : float, vp_w : float, vx0 : float, vx1 : float) -> void:
 	for h in layout.hazards:
-		if h["world_x"] < vx0 - 200 or h["world_x"] > vx1 + 200:
+		var hx : float = h["world_x"]
+		if hx < vx0 - 200 or hx > vx1 + 200:
 			continue
-		var sx := _world_to_sx(h["world_x"])
+		var sx := _world_to_sx(hx)
 		var sy := lane_y - 64.0
 		var p := PackedVector2Array([Vector2(sx, sy + 64), Vector2(sx + 16, sy), Vector2(sx + 32, sy + 64)])
 		draw_colored_polygon(p, Color.RED.darkened(0.3))
