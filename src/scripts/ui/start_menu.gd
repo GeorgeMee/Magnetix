@@ -7,12 +7,16 @@ func _ready() -> void:
 	%StartButton.pressed.connect(_on_start)
 	%SettingsButton.pressed.connect(_on_settings)
 	%SimPreviewButton.pressed.connect(_on_sim_preview)
+	%SimSceneButton.pressed.connect(_on_sim_scene)
 
 func _on_start() -> void:
 	get_tree().change_scene_to_file("res://src/scenes/main/main.tscn")
 
 func _on_sim_preview() -> void:
 	get_tree().change_scene_to_file("res://src/scenes/ui/sim_preview.tscn")
+
+func _on_sim_scene() -> void:
+	get_tree().change_scene_to_file("res://src/scenes/sim/sim_scene.tscn")
 
 func _on_settings() -> void:
 	if settings_panel:

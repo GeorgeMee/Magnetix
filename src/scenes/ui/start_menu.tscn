@@ -45,3 +45,8 @@ text = "设 置"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Sim 预览"
+
+[node name="SimSceneButton" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Sim 场景"
