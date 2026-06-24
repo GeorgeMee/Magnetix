@@ -102,10 +102,8 @@ func _place_coins(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int
 			if pt.world_x > x:
 				break
 			surf = _get_surface(pt, lane)
-		var base_y := 15.0 if surf == Character.Surface.FLOOR else GameManager.ceiling_offset - 15.0
-		var y_off := base_y + rng.randf_range(-20.0, 20.0)
-		y_off = clampf(y_off, 15.0, GameManager.ceiling_offset - 15.0)
-		layout.coins.append({"world_x": x, "type": ctype, "y_off": y_off})
+		var base_y := 35.0 if surf == Character.Surface.FLOOR else GameManager.ceiling_offset - 35.0
+		layout.coins.append({"world_x": x, "type": ctype, "y_off": base_y})
 
 func _place_walls(layout : ChunkLayout, pts : Array[TrajectoryPoint], lane : int, chunk_start : float, chunk_width : float) -> void:
 	for i in range(pts.size() - 1):

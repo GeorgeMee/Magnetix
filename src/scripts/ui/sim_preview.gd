@@ -65,14 +65,25 @@ func _process(delta : float) -> void:
 		var cur_a := _get_surface_at(sim_time, 0)
 		var cur_b := _get_surface_at(sim_time, 1)
 		if cur_a != prev_surf_a:
-			last_flip_time_a = sim_time
+			last_flip_time_a = _find_flip_point(sim_time, 0)
 			last_surf_a = prev_surf_a
 		if cur_b != prev_surf_b:
-			last_flip_time_b = sim_time
+			last_flip_time_b = _find_flip_point(sim_time, 1)
 			last_surf_b = prev_surf_b
 		prev_surf_a = cur_a
 		prev_surf_b = cur_b
 	queue_redraw()
+
+func _find_flip_point(wx : float, lane : int) -> float:
+	for i in range(trajectory.size()):
+		var s := trajectory[i].char_a_surface if lane == 0 else trajectory[i].char_b_surface
+		if trajectory[i].world_x > wx:
+			break
+		if i > 0:
+			var ps := trajectory[i - 1].char_a_surface if lane == 0 else trajectory[i - 1].char_b_surface
+			if s != ps and trajectory[i].world_x <= wx:
+				return trajectory[i].world_x
+	return wx
 
 func _on_speed_changed(value : float) -> void:
 	sim_speed = value
@@ -215,8 +226,8 @@ func _draw_trajectory_path(lane_top : float, lane_bot : float, coff : float, vp_
 			if sx < -200 or sx > vp_w + 200:
 				prev_sx = sx
 				continue
-			var fy_a := _feet_y_at(lane_top, coff, pt0.char_a_surface)
-			var fy_b := _feet_y_at(lane_bot, coff, pt0.char_b_surface)
+			var fy_a := _feet_y_at(lane_top, coff, _get_surface_at(wx, 0))
+			var fy_b := _feet_y_at(lane_bot, coff, _get_surface_at(wx, 1))
 			if not first and sx > prev_sx - 5:
 				draw_line(Vector2(prev_sx, prev_fy_a), Vector2(sx, fy_a), Color(Color.DODGER_BLUE, 0.15), 2.0)
 				draw_line(Vector2(prev_sx, prev_fy_b), Vector2(sx, fy_b), Color(Color.ORANGE_RED, 0.15), 2.0)
@@ -239,45 +250,23 @@ func _draw_characters(lane_top : float, lane_bot : float, coff : float, vp_w : f
 	var fy_a := _smooth_feet_y(lane_top, coff, char_h, 0)
 	var fy_b := _smooth_feet_y(lane_bot, coff, char_h, 1)
 
-	var ay : float
-	var by : float
-	var flip_a := false
-	var flip_b := false
+	var ay := fy_a - char_h
+	var by := fy_b - char_h
+	var on_ceil_a := fy_a < lane_top - coff * 0.5
+	var on_ceil_b := fy_b < lane_bot - coff * 0.5
 
-	if fy_a < lane_top - coff * 0.5:
-		flip_a = true
-		ay = fy_a
-	else:
-		ay = fy_a - char_h
+	var color_a := Color.DODGER_BLUE.lightened(0.3) if on_ceil_a else Color.DODGER_BLUE
+	var color_b := Color.ORANGE_RED.lightened(0.3) if on_ceil_b else Color.ORANGE_RED
 
-	if fy_b < lane_bot - coff * 0.5:
-		flip_b = true
-		by = fy_b
-	else:
-		by = fy_b - char_h
-
-	var color_a := Color.DODGER_BLUE
-	var color_b := Color.ORANGE_RED
-	var light_a := Color.DODGER_BLUE.lightened(0.3)
-	var light_b := Color.ORANGE_RED.lightened(0.3)
-
-	draw_rect(Rect2(Vector2(char_x, ay), Vector2(char_w, char_h)), color_a if not flip_a else light_a)
+	draw_rect(Rect2(Vector2(char_x, ay), Vector2(char_w, char_h)), color_a)
 	draw_rect(Rect2(Vector2(char_x, ay), Vector2(char_w, char_h)), Color.BLACK, false, 2.0)
-	if flip_a:
-		draw_line(Vector2(char_x, ay), Vector2(char_x + char_w, ay), Color.RED, 2.0)
-		draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, ay + 4), "A", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
-	else:
-		draw_line(Vector2(char_x, ay + char_h), Vector2(char_x + char_w, ay + char_h), Color.RED, 2.0)
-		draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, ay + char_h - 12), "A", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
+	draw_line(Vector2(char_x, fy_a), Vector2(char_x + char_w, fy_a), Color.RED, 2.0)
+	draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, fy_a - 12), "A", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
 
-	draw_rect(Rect2(Vector2(char_x, by), Vector2(char_w, char_h)), color_b if not flip_b else light_b)
+	draw_rect(Rect2(Vector2(char_x, by), Vector2(char_w, char_h)), color_b)
 	draw_rect(Rect2(Vector2(char_x, by), Vector2(char_w, char_h)), Color.BLACK, false, 2.0)
-	if flip_b:
-		draw_line(Vector2(char_x, by), Vector2(char_x + char_w, by), Color.RED, 2.0)
-		draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, by + 4), "B", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
-	else:
-		draw_line(Vector2(char_x, by + char_h), Vector2(char_x + char_w, by + char_h), Color.RED, 2.0)
-		draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, by + char_h - 12), "B", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
+	draw_line(Vector2(char_x, fy_b), Vector2(char_x + char_w, fy_b), Color.RED, 2.0)
+	draw_string(ThemeDB.fallback_font, Vector2(char_x + char_w + 4, fy_b - 12), "B", HORIZONTAL_ALIGNMENT_LEFT, -1, 12)
 
 func _input(event : InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
