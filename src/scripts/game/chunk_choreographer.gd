@@ -68,7 +68,9 @@ func get_chunk_layout(chunk_world_x : float, lane : int, chunk_width : float) ->
 func _layout_coins(layout : ChunkLayout, lane_traj : Array, chunk_start : float, chunk_width : float) -> void:
 	var coin_step := 120.0
 	var cy := 80.0
-	for x := chunk_start + 40.0; x < chunk_start + chunk_width - 40.0; x += coin_step:
+	var x : float = chunk_start + 40.0
+	while x < chunk_start + chunk_width - 40.0:
+		x += coin_step
 		if rng.randi_range(0, 3) == 0:
 			continue
 		var ctype : int = Coin.Type.BLUE
