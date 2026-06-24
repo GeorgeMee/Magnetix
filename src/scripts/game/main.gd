@@ -6,6 +6,7 @@ extends Node2D
 @onready var input_manager : InputManager = $InputManager
 @onready var spike : Spike = $Spike
 @onready var game_hud : GameHUD = $GameHUD
+@onready var choreographer : ChunkChoreographer = $ChunkChoreographer
 
 var character_a : Character
 var character_b : Character
@@ -19,11 +20,13 @@ func _ready() -> void:
 	GameManager.lane_bottom_y = 750.0
 	GameManager.ceiling_offset = 180.0
 	GameManager.player_fixed_x = 500.0
+	GameManager.choreographer = choreographer
 
 	_spawn_characters()
 	GameManager.character_a = character_a
 	GameManager.character_b = character_b
 	_connect_input()
+	_ensure_trajectory()
 	game_hud.update_button_colors(character_a.character_color, character_b.character_color)
 	GameManager.start_game()
 
@@ -57,10 +60,12 @@ func _on_swap() -> void:
 	character_b.character_color = tmp_color
 	character_b.character_polarity = tmp_polarity
 	game_hud.update_button_colors(character_a.character_color, character_b.character_color)
+	_ensure_trajectory()
 
 func _process(delta : float) -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
+	_ensure_trajectory()
 	_check_game_over()
 	queue_redraw()
 
@@ -69,6 +74,30 @@ func _draw() -> void:
 	_draw_lane(GameManager.lane_bottom_y, Color.WEB_GREEN)
 	var viewport_size := get_viewport().get_visible_rect().size
 	draw_rect(Rect2(Vector2(0, 0), viewport_size), Color.BLACK, false, 4.0)
+	if GameManager.debug_visualize:
+		_draw_trajectory()
+
+func _draw_trajectory() -> void:
+	for pt in GameManager.trajectory_data:
+		var sx := GameManager.scroll_manager.world_to_screen_x(pt.world_x)
+		var ay : float
+		var by : float
+		if pt.char_a_surface == Character.Surface.CEILING:
+			ay = GameManager.lane_top_y - GameManager.ceiling_offset
+		else:
+			ay = GameManager.lane_top_y - Character.CHAR_HEIGHT
+		if pt.char_b_surface == Character.Surface.CEILING:
+			by = GameManager.lane_bottom_y - GameManager.ceiling_offset
+		else:
+			by = GameManager.lane_bottom_y - Character.CHAR_HEIGHT
+		draw_rect(Rect2(Vector2(sx, ay), Vector2(Character.CHAR_WIDTH, Character.CHAR_HEIGHT)), Color(Color.DODGER_BLUE, 0.3), false, 1.0)
+		draw_rect(Rect2(Vector2(sx, by), Vector2(Character.CHAR_WIDTH, Character.CHAR_HEIGHT)), Color(Color.ORANGE_RED, 0.3), false, 1.0)
+		if pt.swap_trigger:
+			draw_circle(Vector2(sx + Character.CHAR_WIDTH * 0.5, ay + Character.CHAR_HEIGHT * 0.5), 6.0, Color.YELLOW)
+		if pt.magnet_a_trigger:
+			draw_rect(Rect2(Vector2(sx, ay - 4), Vector2(4, 4)), Color.WHITE)
+		if pt.magnet_b_trigger:
+			draw_rect(Rect2(Vector2(sx, by - 4), Vector2(4, 4)), Color.WHITE)
 
 func _draw_lane(floor_y : float, color : Color) -> void:
 	var viewport_width := get_viewport().get_visible_rect().size.x
@@ -86,6 +115,13 @@ func _check_game_over() -> void:
 		character_a.die()
 		character_b.die()
 		GameManager.end_game()
+
+func _ensure_trajectory() -> void:
+	if not character_a or not character_b:
+		return
+	var from_x := GameManager.scroll_manager.screen_to_world_x(1920)
+	choreographer.ensure_trajectory(from_x, character_a.character_polarity, character_b.character_polarity)
+	GameManager.trajectory_data = choreographer.trajectory
 
 func get_characters() -> Array[Character]:
 	return [character_a, character_b]

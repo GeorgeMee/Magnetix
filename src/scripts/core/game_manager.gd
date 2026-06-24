@@ -19,6 +19,7 @@ var ceiling_offset : float = 120.0
 var physics_system : PhysicsSystem
 var scroll_manager : ScrollManager
 var magnet_manager : MagnetManager
+var choreographer : ChunkChoreographer
 
 var character_a : Character
 var character_b : Character
@@ -29,6 +30,14 @@ var coin_rainbow : int = 0
 var magnetism_duration : float = 3.0
 var magnetism_cooldown : float = 2.0
 
+var chunk_width : float = 640.0
+var sim_decision_interval : float = 300.0
+var sim_chunks_ahead : int = 5
+var current_chunk_index : int = 0
+var assist_mode : bool = false
+var debug_visualize : bool = false
+var trajectory_data : Array[TrajectoryPoint] = []
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
@@ -38,6 +47,7 @@ func _process(delta : float) -> void:
 		score = distance
 		lane_top_scroll_speed = base_scroll_speed
 		lane_bottom_scroll_speed = base_scroll_speed
+		current_chunk_index = int(distance / chunk_width)
 
 func start_game() -> void:
 	state = GameState.PLAYING

@@ -37,6 +37,14 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "⇄ 交换"
 
+[node name="AssistToggle" type="Button" parent="."]
+unique_name_in_owner = true
+offset_left = 40.0
+offset_top = 70.0
+offset_right = 180.0
+offset_bottom = 110.0
+text = "辅助:关"
+
 [node name="BtnMagnetA" type="Button" parent="."]
 unique_name_in_owner = true
 anchors_preset = 10

@@ -1,8 +1,6 @@
 class_name ChunkSpawner
 extends Node
 
-@export var chunk_width : float = 640.0
-@export var spawn_distance_ahead : float = 2400.0
 @export var despawn_distance_behind : float = 600.0
 
 var active_walls : Array[Wall]
@@ -23,6 +21,7 @@ func _process(_delta : float) -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
 	var scroll_mgr := GameManager.scroll_manager
+	var chunk_width := GameManager.chunk_width
 	var spawn_threshold := scroll_mgr.screen_to_world_x(1920 + chunk_width)
 	while next_spawn_world_x < spawn_threshold:
 		_spawn_chunk(next_spawn_world_x)
@@ -30,48 +29,23 @@ func _process(_delta : float) -> void:
 	_cleanup_offscreen()
 
 func _spawn_chunk(world_x : float) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
-
-	var wall_gap_min := 60.0
-	var wall_gap_max := 100.0
-
+	var chunk_width := GameManager.chunk_width
 	for lane in [0, 1]:
-		var p_place : Magnet.Placement = Magnet.Placement.CEILING if rng.randi_range(0, 1) == 0 else Magnet.Placement.FLOOR
-		var p_pol : Magnet.Polarity = Magnet.Polarity.NORTH if rng.randi_range(0, 1) == 0 else Magnet.Polarity.SOUTH
-		_spawn_magnet(world_x + 100.0 + lane * 200.0, lane, p_place, p_pol, 160.0)
-
-		if rng.randi_range(0, 2) == 0:
-			var magnet_left : float = world_x + 100.0 + lane * 200.0
-			var gap := rng.randf_range(wall_gap_min, wall_gap_max)
-			_spawn_wall(magnet_left + gap, lane)
-
-		if rng.randi_range(0, 3) == 0:
-			var magnet_left : float = world_x + 100.0 + lane * 200.0
-			var gap := rng.randf_range(30.0, 80.0)
-			_spawn_hazard(magnet_left + gap, lane)
-
-		var coin_count := rng.randi_range(1, 3)
-		for j in coin_count:
-			var magnet_left : float = world_x + 100.0 + lane * 200.0
-			var cx := magnet_left + rng.randf_range(10.0, 150.0)
-			var ctype := _rand_coin_type(rng)
-			var cy := rng.randf_range(20.0, GameManager.ceiling_offset - 20.0)
-			_spawn_coin(cx, lane, ctype, cy)
+		var layout := GameManager.choreographer.get_chunk_layout(world_x, lane, chunk_width)
+		for m in layout.magnets:
+			_spawn_magnet(m["world_x"], lane, m["placement"], m["polarity"], m["length"])
+		for w in layout.walls:
+			_spawn_wall(w["world_x"], lane)
+		for h in layout.hazards:
+			_spawn_hazard(h["world_x"], lane)
+		for c in layout.coins:
+			_spawn_coin(c["world_x"], lane, c["type"], c["y_off"])
 
 func _spawn_wall(world_x : float, lane : int) -> void:
 	var wall := wall_scene.instantiate() as Wall
 	wall.setup(world_x, lane)
 	add_child(wall)
 	active_walls.append(wall)
-
-func _rand_coin_type(rng: RandomNumberGenerator) -> Coin.Type:
-	var r := rng.randi_range(0, 9)
-	if r < 4:
-		return Coin.Type.BLUE
-	elif r < 8:
-		return Coin.Type.RED
-	return Coin.Type.RAINBOW
 
 func _spawn_coin(world_x : float, lane : int, type : Coin.Type, y_off : float) -> void:
 	var coin := coin_scene.instantiate() as Coin
