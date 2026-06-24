@@ -9,9 +9,13 @@ var playing : bool = true
 var total_length : float = 5000.0
 var char_x : float = 400.0
 var transition_dist : float = 260.0
-
-var char_a_display_y : float = 0.0
-var char_b_display_y : float = 0.0
+var last_surf_a := SimAI.Surface.FLOOR
+var last_surf_b := SimAI.Surface.FLOOR
+var last_flip_time_a : float = -9999.0
+var last_flip_time_b : float = -9999.0
+var prev_surf_a := SimAI.Surface.FLOOR
+var prev_surf_b := SimAI.Surface.FLOOR
+var prev_check_time : float = -9999.0
 
 @onready var speed_slider : HSlider = %SpeedSlider
 @onready var speed_label : Label = %SpeedLabel
@@ -27,16 +31,36 @@ func _ready() -> void:
 func _regenerate() -> void:
 	trajectory = sim_ai.generate(Magnet.Polarity.NORTH, Magnet.Polarity.SOUTH, 100.0, total_length, GameManager.sim_decision_interval)
 	sim_time = 0.0
-	char_a_display_y = 0.0
-	char_b_display_y = 0.0
+	last_surf_a = SimAI.Surface.FLOOR
+	last_surf_b = SimAI.Surface.FLOOR
+	last_flip_time_a = -9999.0
+	last_flip_time_b = -9999.0
+	prev_surf_a = SimAI.Surface.FLOOR
+	prev_surf_b = SimAI.Surface.FLOOR
+	prev_check_time = -9999.0
 
 func _process(delta : float) -> void:
 	if playing:
+		var prev_time := sim_time
 		sim_time += sim_speed * delta
 		if sim_time > total_length:
 			sim_time -= total_length
-			char_a_display_y = 0.0
-			char_b_display_y = 0.0
+			last_flip_time_a -= total_length
+			last_flip_time_b -= total_length
+			prev_check_time -= total_length
+
+		if sim_time - prev_check_time > 0.05:
+			var cur_a := _get_surface_at(sim_time, 0)
+			var cur_b := _get_surface_at(sim_time, 1)
+			if cur_a != prev_surf_a:
+				last_flip_time_a = sim_time
+				last_surf_a = prev_surf_a
+			if cur_b != prev_surf_b:
+				last_flip_time_b = sim_time
+				last_surf_b = prev_surf_b
+			prev_surf_a = cur_a
+			prev_surf_b = cur_b
+			prev_check_time = sim_time
 	queue_redraw()
 
 func _on_speed_changed(value : float) -> void:
@@ -50,9 +74,6 @@ func _on_play_toggle() -> void:
 func _feet_y_at(floor_y : float, coff : float, surf : int) -> float:
 	return floor_y if surf == SimAI.Surface.FLOOR else floor_y - coff
 
-func _rect_y_at(floor_y : float, coff : float, char_h : float, surf : int) -> float:
-	return floor_y - char_h if surf == SimAI.Surface.FLOOR else floor_y - coff
-
 func _get_surface_at(world_x : float, lane : int) -> int:
 	var current := SimAI.Surface.FLOOR
 	for i in range(trajectory.size()):
@@ -61,31 +82,19 @@ func _get_surface_at(world_x : float, lane : int) -> int:
 		current = trajectory[i].char_a_surface if lane == 0 else trajectory[i].char_b_surface
 	return current
 
-func _get_prev_flip_x(world_x : float, lane : int) -> float:
-	var last_x : float = 0.0
-	var last_surf := SimAI.Surface.FLOOR
-	for i in range(trajectory.size()):
-		if trajectory[i].world_x > world_x:
-			break
-		var s := trajectory[i].char_a_surface if lane == 0 else trajectory[i].char_b_surface
-		if s != last_surf:
-			last_x = trajectory[i].world_x
-			last_surf = s
-	return last_x
-
 func _smooth_feet_y(floor_y : float, coff : float, char_h : float, lane : int) -> float:
 	var surf := _get_surface_at(sim_time, lane)
-	var prev_surf := _get_surface_at(sim_time - 0.01, lane)
 	var target_y := _feet_y_at(floor_y, coff, surf)
+	var last_flip := last_flip_time_a if lane == 0 else last_flip_time_b
+	var old_surf := last_surf_a if lane == 0 else last_surf_b
 
-	if surf == prev_surf:
+	var elapsed := sim_time - last_flip
+	if elapsed >= transition_dist or elapsed < 0.0:
 		return target_y
 
-	var flip_x := _get_prev_flip_x(sim_time, lane)
-	var progress := clampf((sim_time - flip_x) / transition_dist, 0.0, 1.0)
+	var progress := clampf(elapsed / transition_dist, 0.0, 1.0)
 	progress = ease(progress, 0.5)
-
-	var old_y := _feet_y_at(floor_y, coff, prev_surf)
+	var old_y := _feet_y_at(floor_y, coff, old_surf)
 	return lerpf(old_y, target_y, progress)
 
 func _draw() -> void:
