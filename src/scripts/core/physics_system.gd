@@ -3,10 +3,12 @@ extends Node
 
 var bodies : Array[CustBody]
 var static_bodies : Array[CustBody]
+var hazard_bodies : Array[CustBody]
 
 func _ready() -> void:
 	bodies = []
 	static_bodies = []
+	hazard_bodies = []
 
 func register_body(body : CustBody) -> void:
 	if bodies.has(body):
@@ -23,6 +25,21 @@ func register_static_body(body : CustBody) -> void:
 
 func unregister_static_body(body : CustBody) -> void:
 	static_bodies.erase(body)
+
+func register_hazard_body(body : CustBody) -> void:
+	if hazard_bodies.has(body):
+		return
+	hazard_bodies.append(body)
+
+func unregister_hazard_body(body : CustBody) -> void:
+	hazard_bodies.erase(body)
+
+func is_overlapping_hazard(body : CustBody) -> bool:
+	var d_aabb := body.get_aabb()
+	for hb in hazard_bodies:
+		if d_aabb.overlaps(hb.get_aabb()):
+			return true
+	return false
 
 func step(_delta : float) -> void:
 	for body in bodies:

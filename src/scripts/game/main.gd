@@ -21,7 +21,10 @@ func _ready() -> void:
 	GameManager.player_fixed_x = 500.0
 
 	_spawn_characters()
+	GameManager.character_a = character_a
+	GameManager.character_b = character_b
 	_connect_input()
+	game_hud.update_button_colors(character_a.character_color, character_b.character_color)
 	GameManager.start_game()
 
 func _spawn_characters() -> void:
@@ -53,6 +56,7 @@ func _on_swap() -> void:
 	character_a.character_polarity = character_b.character_polarity
 	character_b.character_color = tmp_color
 	character_b.character_polarity = tmp_polarity
+	game_hud.update_button_colors(character_a.character_color, character_b.character_color)
 
 func _process(delta : float) -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
@@ -74,6 +78,9 @@ func _draw_lane(floor_y : float, color : Color) -> void:
 
 func _check_game_over() -> void:
 	if not character_a.is_alive or not character_b.is_alive:
+		character_a.die()
+		character_b.die()
+		GameManager.end_game()
 		return
 	if spike.is_character_hit(character_a) or spike.is_character_hit(character_b):
 		character_a.die()

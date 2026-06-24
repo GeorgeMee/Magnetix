@@ -20,6 +20,15 @@ var physics_system : PhysicsSystem
 var scroll_manager : ScrollManager
 var magnet_manager : MagnetManager
 
+var character_a : Character
+var character_b : Character
+var coin_red : int = 0
+var coin_blue : int = 0
+var coin_rainbow : int = 0
+
+var magnetism_duration : float = 3.0
+var magnetism_cooldown : float = 2.0
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
@@ -35,6 +44,9 @@ func start_game() -> void:
 	score = 0.0
 	distance = 0.0
 	base_scroll_speed = 200.0
+	coin_red = 0
+	coin_blue = 0
+	coin_rainbow = 0
 
 func end_game() -> void:
 	state = GameState.GAME_OVER

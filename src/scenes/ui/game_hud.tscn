@@ -13,29 +13,59 @@ offset_right = 300.0
 offset_bottom = 60.0
 text = "Score: 0"
 
-[node name="BtnMagnetA" type="Button" parent="."]
+[node name="CoinLabel" type="Label" parent="."]
 unique_name_in_owner = true
-offset_left = 40.0
-offset_top = 940.0
-offset_right = 200.0
-offset_bottom = 1040.0
-text = "A磁力"
-
-[node name="BtnMagnetB" type="Button" parent="."]
-unique_name_in_owner = true
-offset_left = 220.0
-offset_top = 940.0
-offset_right = 380.0
-offset_bottom = 1040.0
-text = "B磁力"
+offset_left = 1620.0
+offset_top = 20.0
+offset_right = 1900.0
+offset_bottom = 60.0
+text = "B:0  R:0  ★:0"
+horizontal_alignment = 2
 
 [node name="BtnSwap" type="Button" parent="."]
 unique_name_in_owner = true
-offset_left = 1740.0
-offset_top = 940.0
-offset_right = 1880.0
-offset_bottom = 1040.0
-text = "交换"
+anchors_preset = 5
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 160.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "⇄ 交换"
+
+[node name="BtnMagnetA" type="Button" parent="."]
+unique_name_in_owner = true
+anchors_preset = 10
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 2
+text = "▲ 上"
+
+[node name="BtnMagnetB" type="Button" parent="."]
+unique_name_in_owner = true
+anchors_preset = 14
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 2
+text = "▼ 下"
 
 [node name="GameOverPanel" type="Panel" parent="."]
 unique_name_in_owner = true
@@ -69,6 +99,11 @@ layout_mode = 2
 text = "Score: 0"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="SettingsButton" type="Button" parent="GameOverPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "设 置"
 
 [node name="RestartButton" type="Button" parent="GameOverPanel/VBoxContainer"]
 unique_name_in_owner = true

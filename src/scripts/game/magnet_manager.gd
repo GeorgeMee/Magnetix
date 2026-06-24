@@ -13,6 +13,13 @@ func register_magnet(magnet : Magnet) -> void:
 func unregister_magnet(magnet : Magnet) -> void:
 	magnets.erase(magnet)
 
+func is_character_in_any_field(character : Character) -> bool:
+	for magnet in magnets:
+		magnet.update_field_aabb()
+		if magnet.is_character_in_field(character):
+			return true
+	return false
+
 func get_target_surface(character : Character, magnetism_active : bool) -> Character.Surface:
 	if not magnetism_active:
 		return Character.Surface.FLOOR

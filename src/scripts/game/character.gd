@@ -15,6 +15,10 @@ var character_color : Color = Color.DODGER_BLUE
 var physics_body : CustBody
 var current_surface : Surface = Surface.FLOOR
 var magnetism_active : bool = false
+var magnetism_timer : float = 0.0
+var cooldown_timer : float = 0.0
+var can_activate : bool = true
+var was_in_field : bool = false
 var is_alive : bool = true
 
 var floor_y : float = 0.0
@@ -38,7 +42,10 @@ func _process(delta : float) -> void:
 	_update_vertical(delta)
 	_update_graphics()
 	_clamp_to_bounds()
+	_update_magnetism(delta)
 	GameManager.physics_system.resolve_for_body(physics_body)
+	if GameManager.physics_system.is_overlapping_hazard(physics_body):
+		die()
 	queue_redraw()
 
 func _draw() -> void:
@@ -127,7 +134,46 @@ func _fall_to_floor(delta : float) -> void:
 		physics_body.velocity.y = 0
 
 func toggle_magnetism() -> void:
-	magnetism_active = not magnetism_active
+	if magnetism_active:
+		var in_field := GameManager.magnet_manager.is_character_in_any_field(self)
+		magnetism_active = false
+		magnetism_timer = GameManager.magnetism_duration
+		if in_field:
+			can_activate = true
+			cooldown_timer = 0.0
+		else:
+			can_activate = false
+			cooldown_timer = GameManager.magnetism_cooldown
+	else:
+		if not can_activate:
+			return
+		magnetism_active = true
+		magnetism_timer = GameManager.magnetism_duration
+		cooldown_timer = 0.0
+
+func _update_magnetism(delta: float) -> void:
+	var in_field := GameManager.magnet_manager.is_character_in_any_field(self)
+
+	if magnetism_active:
+		if was_in_field and not in_field:
+			magnetism_active = false
+			magnetism_timer = GameManager.magnetism_duration
+			can_activate = true
+			cooldown_timer = 0.0
+		elif not in_field:
+			magnetism_timer -= delta
+			if magnetism_timer <= 0.0:
+				magnetism_active = false
+				can_activate = false
+				cooldown_timer = GameManager.magnetism_cooldown
+
+	was_in_field = in_field
+
+	if not can_activate:
+		cooldown_timer -= delta
+		if cooldown_timer <= 0.0:
+			can_activate = true
+			cooldown_timer = 0.0
 
 func swap_lane() -> void:
 	lane = Lane.BOTTOM if lane == Lane.TOP else Lane.TOP

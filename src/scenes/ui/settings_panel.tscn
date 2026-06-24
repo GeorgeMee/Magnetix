@@ -1,0 +1,83 @@
+[gd_scene format=3 uid="uid://cw7c5frsgg5dj"]
+
+[ext_resource type="Script" path="res://src/scripts/ui/settings_panel.gd" id="1_script"]
+
+[node name="SettingsPanel" type="Panel"]
+offset_left = 585.0
+offset_top = 260.0
+offset_right = 1335.0
+offset_bottom = 750.0
+script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "设 置"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Spacer1" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DurationLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "磁力持续时间"
+
+[node name="DurationSlider" type="HSlider" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.5
+max_value = 10.0
+step = 0.1
+value = 3.0
+size_flags_horizontal = 3
+
+[node name="DurationValue" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "3.0 秒"
+horizontal_alignment = 1
+
+[node name="Spacer2" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CooldownLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "场外冷却时间"
+
+[node name="CooldownSlider" type="HSlider" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.0
+max_value = 10.0
+step = 0.1
+value = 2.0
+size_flags_horizontal = 3
+
+[node name="CooldownValue" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "2.0 秒"
+horizontal_alignment = 1
+
+[node name="Spacer3" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+
+[node name="CloseButton" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "关 闭"
