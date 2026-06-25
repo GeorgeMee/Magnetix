@@ -4,6 +4,7 @@ var settings_panel : Panel
 
 func _ready() -> void:
 	GameManager.state = GameManager.GameState.MENU
+	GameManager.sim_mode = false
 	%StartButton.pressed.connect(_on_start)
 	%SettingsButton.pressed.connect(_on_settings)
 	%SimPreviewButton.pressed.connect(_on_sim_preview)

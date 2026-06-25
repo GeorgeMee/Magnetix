@@ -17,6 +17,7 @@ func _ready() -> void:
 	GameManager.scroll_manager = scroll_manager
 	GameManager.magnet_manager = magnet_manager
 	GameManager.choreographer = choreographer
+	GameManager.sim_mode = false
 
 	_spawn_characters()
 	GameManager.character_a = character_a
