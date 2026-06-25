@@ -7,6 +7,7 @@ var choreographer: ChunkChoreographer
 var tracked_index_a := -1
 var tracked_index_b := -1
 var tracked_swap_index := -1
+var enable_swap := true
 
 func setup(ca: Character, cb: Character, chor: ChunkChoreographer) -> void:
 	character_a = ca
@@ -19,7 +20,8 @@ func _process(_delta: float) -> void:
 	var sim_time := GameManager.scroll_manager.world_offset
 	_check_a(sim_time)
 	_check_b(sim_time)
-	_check_swap(sim_time)
+	if enable_swap:
+		_check_swap(sim_time)
 
 func _check_a(sim_time: float) -> void:
 	var traj := choreographer.trajectory

@@ -36,6 +36,7 @@ var sim_chunks_ahead : int = 5
 var current_chunk_index : int = 0
 var assist_mode : bool = false
 var sim_mode : bool = false
+var stored_layouts : Array[Dictionary] = []
 var debug_visualize : bool = false
 var trajectory_data : Array[TrajectoryPoint] = []
 

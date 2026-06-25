@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://generatescene"]
+
+[ext_resource type="Script" path="res://src/scripts/sim/generate_scene.gd" id="1_gen"]
+[ext_resource type="Script" path="res://src/scripts/core/physics_system.gd" id="2_physics"]
+[ext_resource type="Script" path="res://src/scripts/game/scroll_manager.gd" id="3_scroll"]
+[ext_resource type="Script" path="res://src/scripts/game/magnet_manager.gd" id="4_magnet"]
+[ext_resource type="Script" path="res://src/scripts/game/chunk_choreographer.gd" id="5_choreo"]
+[ext_resource type="Script" path="res://src/scripts/sim/sim_controller.gd" id="6_ctrl"]
+
+[node name="GenerateScene" type="Node2D"]
+script = ExtResource("1_gen")
+
+[node name="PhysicsSystem" type="Node" parent="."]
+script = ExtResource("2_physics")
+
+[node name="ScrollManager" type="Node" parent="."]
+script = ExtResource("3_scroll")
+
+[node name="MagnetManager" type="Node" parent="."]
+script = ExtResource("4_magnet")
+
+[node name="ChunkChoreographer" type="Node" parent="."]
+script = ExtResource("5_choreo")
+
+[node name="SimController" type="Node" parent="."]
+script = ExtResource("6_ctrl")
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="UILayer"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+offset_top = 20.0
+offset_right = 150.0
+offset_bottom = 50.0
+grow_horizontal = 2
+text = "生成中..."
+horizontal_alignment = 1

@@ -10,6 +10,7 @@ const CHAR_HEIGHT : float = 64.0
 @export var lane : Lane = Lane.TOP
 @export var character_polarity : Magnet.Polarity = Magnet.Polarity.NORTH
 @export var re_center_speed : float = 100.0
+@export var custom_fixed_x : float = 0.0
 
 var character_color : Color = Color.DODGER_BLUE
 var physics_body : CustBody
@@ -30,7 +31,7 @@ var fall_gravity : float = 800.0
 @onready var sprite : Sprite2D = $Sprite2D
 
 func _ready() -> void:
-	default_x = GameManager.player_fixed_x
+	default_x = custom_fixed_x if custom_fixed_x > 0.0 else GameManager.player_fixed_x
 	_setup_lane_positions()
 	physics_body = CustBody.new(Vector2(default_x, floor_y - CHAR_HEIGHT), Vector2(CHAR_WIDTH, CHAR_HEIGHT))
 	GameManager.physics_system.register_body(physics_body)

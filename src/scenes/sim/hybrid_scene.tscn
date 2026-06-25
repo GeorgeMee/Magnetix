@@ -1,0 +1,41 @@
+[gd_scene load_steps=11 format=3 uid="uid://hybridscene"]
+
+[ext_resource type="Script" path="res://src/scripts/sim/hybrid_scene.gd" id="1_hybrid"]
+[ext_resource type="Script" path="res://src/scripts/core/physics_system.gd" id="2_physics"]
+[ext_resource type="Script" path="res://src/scripts/game/scroll_manager.gd" id="3_scroll"]
+[ext_resource type="Script" path="res://src/scripts/game/magnet_manager.gd" id="4_magnet"]
+[ext_resource type="Script" path="res://src/scripts/game/chunk_choreographer.gd" id="5_choreo"]
+[ext_resource type="Script" path="res://src/scripts/game/chunk_spawner.gd" id="6_spawner"]
+[ext_resource type="Script" path="res://src/scripts/game/input_manager.gd" id="7_input"]
+[ext_resource type="Script" path="res://src/scripts/game/spike.gd" id="8_spike"]
+[ext_resource type="PackedScene" uid="uid://gamehud" path="res://src/scenes/ui/game_hud.tscn" id="9_hud"]
+[ext_resource type="Script" path="res://src/scripts/sim/sim_controller.gd" id="10_ctrl"]
+
+[node name="HybridScene" type="Node2D"]
+script = ExtResource("1_hybrid")
+
+[node name="PhysicsSystem" type="Node" parent="."]
+script = ExtResource("2_physics")
+
+[node name="ScrollManager" type="Node" parent="."]
+script = ExtResource("3_scroll")
+
+[node name="MagnetManager" type="Node" parent="."]
+script = ExtResource("4_magnet")
+
+[node name="ChunkChoreographer" type="Node" parent="."]
+script = ExtResource("5_choreo")
+
+[node name="ChunkSpawner" type="Node" parent="."]
+script = ExtResource("6_spawner")
+
+[node name="InputManager" type="Node" parent="."]
+script = ExtResource("7_input")
+
+[node name="Spike" type="Node2D" parent="."]
+script = ExtResource("8_spike")
+
+[node name="SimController" type="Node" parent="."]
+script = ExtResource("10_ctrl")
+
+[node name="GameHUD" parent="." instance=ExtResource("9_hud")]

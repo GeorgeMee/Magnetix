@@ -9,6 +9,8 @@ func _ready() -> void:
 	%SettingsButton.pressed.connect(_on_settings)
 	%SimPreviewButton.pressed.connect(_on_sim_preview)
 	%SimSceneButton.pressed.connect(_on_sim_scene)
+	%HybridButton.pressed.connect(_on_hybrid)
+	%GenerateButton.pressed.connect(_on_generate)
 
 func _on_start() -> void:
 	get_tree().change_scene_to_file("res://src/scenes/main/main.tscn")
@@ -18,6 +20,12 @@ func _on_sim_preview() -> void:
 
 func _on_sim_scene() -> void:
 	get_tree().change_scene_to_file("res://src/scenes/sim/sim_scene.tscn")
+
+func _on_hybrid() -> void:
+	get_tree().change_scene_to_file("res://src/scenes/sim/hybrid_scene.tscn")
+
+func _on_generate() -> void:
+	get_tree().change_scene_to_file("res://src/scenes/sim/generate_scene.tscn")
 
 func _on_settings() -> void:
 	if settings_panel:
