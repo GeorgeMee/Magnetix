@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://generatescene"]
+[gd_scene format=3 uid="uid://ci8i57v474ivm"]
 
 [ext_resource type="Script" path="res://src/scripts/sim/generate_scene.gd" id="1_gen"]
 [ext_resource type="Script" path="res://src/scripts/core/physics_system.gd" id="2_physics"]

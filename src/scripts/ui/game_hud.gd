@@ -15,6 +15,7 @@ signal swap_pressed
 @onready var restart_button : Button = %RestartButton
 @onready var settings_button : Button = %SettingsButton
 @onready var assist_toggle : Button = %AssistToggle
+@onready var debug_toggle : Button = %DebugToggle
 var settings_panel : Panel
 var highlight_tween : Tween
 var highlight_on : bool = false
@@ -26,7 +27,9 @@ func _ready() -> void:
 	restart_button.pressed.connect(_on_restart_pressed)
 	settings_button.pressed.connect(_on_settings)
 	assist_toggle.pressed.connect(_on_assist_toggle)
+	debug_toggle.pressed.connect(_on_debug_toggle)
 	_update_assist_button_text()
+	_update_debug_button_text()
 
 func _process(delta : float) -> void:
 	if GameManager.state == GameManager.GameState.PLAYING:
@@ -80,10 +83,25 @@ func _on_assist_toggle() -> void:
 func _update_assist_button_text() -> void:
 	assist_toggle.text = "辅助:开" if GameManager.assist_mode else "辅助:关"
 
+func _on_debug_toggle() -> void:
+	GameManager.debug_visualize = not GameManager.debug_visualize
+	_update_debug_button_text()
+
+func _update_debug_button_text() -> void:
+	debug_toggle.text = "轨迹:开" if GameManager.debug_visualize else "轨迹:关"
+
 func _update_assist_highlights(delta : float) -> void:
 	pulse_time += delta
 	var pulse := absf(sin(pulse_time * 4.0))
-	var highlight_color := Color.YELLOW
+	var highlight_color := Color.YELLOW.lerp(Color.WHITE, pulse)
+
+	var default_a := GameManager.character_a.character_color if GameManager.character_a else Color.DODGER_BLUE
+	var default_b := GameManager.character_b.character_color if GameManager.character_b else Color.ORANGE_RED
+	var default_swap := Color.WHITE
+
+	var has_swap := false
+	var has_mag_a := false
+	var has_mag_b := false
 
 	var dist := GameManager.scroll_manager.world_offset + GameManager.player_fixed_x
 	for pt in GameManager.trajectory_data:
@@ -93,17 +111,13 @@ func _update_assist_highlights(delta : float) -> void:
 		if screen_x > 1920:
 			continue
 		if screen_x < 1200:
-			highlight_color = highlight_color.lerp(Color.WHITE, pulse)
-
 			if pt.swap_trigger:
-				btn_swap.modulate = highlight_color
+				has_swap = true
 			if pt.magnet_a_trigger:
-				btn_magnet_a.modulate = highlight_color
+				has_mag_a = true
 			if pt.magnet_b_trigger:
-				btn_magnet_b.modulate = highlight_color
-			return
-		else:
-			btn_magnet_a.modulate = GameManager.character_a.character_color
-			btn_magnet_b.modulate = GameManager.character_b.character_color
-			btn_swap.modulate = Color.WHITE
-	return
+				has_mag_b = true
+
+	btn_swap.modulate = highlight_color if has_swap else default_swap
+	btn_magnet_a.modulate = highlight_color if has_mag_a else default_a
+	btn_magnet_b.modulate = highlight_color if has_mag_b else default_b

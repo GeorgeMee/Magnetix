@@ -45,6 +45,14 @@ offset_right = 180.0
 offset_bottom = 110.0
 text = "辅助:关"
 
+[node name="DebugToggle" type="Button" parent="."]
+unique_name_in_owner = true
+offset_left = 40.0
+offset_top = 120.0
+offset_right = 180.0
+offset_bottom = 160.0
+text = "轨迹:关"
+
 [node name="BtnMagnetA" type="Button" parent="."]
 unique_name_in_owner = true
 anchors_preset = 10

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://playscene"]
+[gd_scene format=3 uid="uid://playscene"]
 
 [ext_resource type="Script" path="res://src/scripts/sim/play_scene.gd" id="1_play"]
 [ext_resource type="Script" path="res://src/scripts/core/physics_system.gd" id="2_physics"]

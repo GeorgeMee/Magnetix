@@ -92,11 +92,33 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	_draw_lane(GameManager.lane_top_y, Color.WEB_GREEN)
 	_draw_lane(GameManager.lane_bottom_y, Color.WEB_GREEN)
+	if GameManager.debug_visualize:
+		_draw_trajectory()
 
 func _draw_lane(floor_y: float, color: Color) -> void:
 	var vp_w := get_viewport().get_visible_rect().size.x
 	draw_line(Vector2(0, floor_y), Vector2(vp_w, floor_y), color, 3.0)
 	draw_line(Vector2(0, floor_y - GameManager.ceiling_offset), Vector2(vp_w, floor_y - GameManager.ceiling_offset), color.darkened(0.4), 2.0)
+
+func _draw_trajectory() -> void:
+	for pt in GameManager.trajectory_data:
+		var sx := scroll_manager.world_to_screen_x(pt.world_x)
+		if sx < -100 or sx > get_viewport().get_visible_rect().size.x + 100:
+			continue
+		var ay := GameManager.lane_top_y - Character.CHAR_HEIGHT
+		var by := GameManager.lane_bottom_y - Character.CHAR_HEIGHT
+		if pt.char_a_surface == Character.Surface.CEILING:
+			ay = GameManager.lane_top_y - GameManager.ceiling_offset
+		if pt.char_b_surface == Character.Surface.CEILING:
+			by = GameManager.lane_bottom_y - GameManager.ceiling_offset
+		draw_rect(Rect2(Vector2(sx, ay), Vector2(Character.CHAR_WIDTH, Character.CHAR_HEIGHT)), Color(Color.DODGER_BLUE, 0.3), false, 1.0)
+		draw_rect(Rect2(Vector2(sx, by), Vector2(Character.CHAR_WIDTH, Character.CHAR_HEIGHT)), Color(Color.ORANGE_RED, 0.3), false, 1.0)
+		if pt.swap_trigger:
+			draw_circle(Vector2(sx + Character.CHAR_WIDTH * 0.5, ay + Character.CHAR_HEIGHT * 0.5), 6.0, Color.YELLOW)
+		if pt.magnet_a_trigger:
+			draw_rect(Rect2(Vector2(sx, ay - 4), Vector2(4, 4)), Color.WHITE)
+		if pt.magnet_b_trigger:
+			draw_rect(Rect2(Vector2(sx, by - 4), Vector2(4, 4)), Color.WHITE)
 
 func _check_game_over() -> void:
 	if not player_character_a.is_alive or not player_character_b.is_alive:
