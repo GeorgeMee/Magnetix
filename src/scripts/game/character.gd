@@ -44,7 +44,7 @@ func _process(delta : float) -> void:
 	_clamp_to_bounds()
 	_update_magnetism(delta)
 	GameManager.physics_system.resolve_for_body(physics_body)
-	if GameManager.physics_system.is_overlapping_hazard(physics_body):
+	if not GameManager.sim_mode and GameManager.physics_system.is_overlapping_hazard(physics_body):
 		die()
 	queue_redraw()
 

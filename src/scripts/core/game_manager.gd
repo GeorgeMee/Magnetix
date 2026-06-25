@@ -35,6 +35,7 @@ var sim_decision_interval : float = 300.0
 var sim_chunks_ahead : int = 5
 var current_chunk_index : int = 0
 var assist_mode : bool = false
+var sim_mode : bool = false
 var debug_visualize : bool = false
 var trajectory_data : Array[TrajectoryPoint] = []
 

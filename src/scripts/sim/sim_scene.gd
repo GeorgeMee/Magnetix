@@ -2,7 +2,7 @@ extends Node2D
 
 @onready var physics_system: PhysicsSystem = $PhysicsSystem
 @onready var scroll_manager: ScrollManager = $ScrollManager
-@onready var sim_magnet_manager: SimMagnetManager = $SimMagnetManager
+@onready var magnet_manager: MagnetManager = $MagnetManager
 @onready var choreographer: ChunkChoreographer = $ChunkChoreographer
 @onready var sim_controller: SimController = $SimController
 
@@ -11,9 +11,10 @@ var character_b: Character
 var character_scene: PackedScene = preload("res://src/scenes/game/character.tscn")
 
 func _ready() -> void:
+	GameManager.sim_mode = true
 	GameManager.physics_system = physics_system
 	GameManager.scroll_manager = scroll_manager
-	GameManager.magnet_manager = sim_magnet_manager
+	GameManager.magnet_manager = magnet_manager
 	GameManager.choreographer = choreographer
 
 	_spawn_characters()
