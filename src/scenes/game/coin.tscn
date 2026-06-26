@@ -4,7 +4,5 @@
 
 [node name="Coin" type="Node2D"]
 script = ExtResource("1_coin")
-
-[node name="EditorPlaceholder" type="Polygon2D" parent="."]
-color = Color(0.118, 0.565, 1, 1)
-polygon = PackedVector2Array(0, 8, 8, 0, 16, 8, 8, 16)
+coin_type = 0
+coin_size = 16.0

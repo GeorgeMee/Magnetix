@@ -1,19 +1,22 @@
+@tool
 class_name Wall
 extends Node2D
 
+@export var screen_width : float = 32.0
+@export var screen_height : float = 64.0
+
 var world_x : float = 0.0
 var lane : int = 0
-var screen_width : float = 32.0
-var screen_height : float = 64.0
 var physics_body : CustBody
 
 func _ready() -> void:
-	$EditorPlaceholder.queue_free()
+	if Engine.is_editor_hint():
+		return
 	physics_body = CustBody.new(Vector2.ZERO, Vector2(screen_width, screen_height))
 	GameManager.physics_system.register_static_body(physics_body)
 
 func _process(_delta : float) -> void:
-	if GameManager.state != GameManager.GameState.PLAYING:
+	if Engine.is_editor_hint() or GameManager.state != GameManager.GameState.PLAYING:
 		return
 	if not physics_body:
 		return
@@ -43,5 +46,7 @@ func _update_y() -> void:
 		physics_body.position.y = GameManager.lane_bottom_y - screen_height
 
 func _exit_tree() -> void:
+	if Engine.is_editor_hint():
+		return
 	if GameManager and GameManager.physics_system and physics_body:
 		GameManager.physics_system.unregister_static_body(physics_body)

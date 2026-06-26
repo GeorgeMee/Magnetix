@@ -1,3 +1,4 @@
+@tool
 class_name Magnet
 extends Node2D
 
@@ -15,12 +16,13 @@ var lane : int = 0
 var field_aabb : CustAABB
 
 func _ready() -> void:
-	$EditorPlaceholder.queue_free()
+	if Engine.is_editor_hint():
+		return
 	if GameManager and GameManager.magnet_manager:
 		GameManager.magnet_manager.register_magnet(self)
 
 func _process(_delta : float) -> void:
-	if GameManager.state != GameManager.GameState.PLAYING:
+	if Engine.is_editor_hint() or GameManager.state != GameManager.GameState.PLAYING:
 		return
 	update_field_aabb()
 	position.x = GameManager.scroll_manager.world_to_screen_x(world_x)
@@ -28,14 +30,16 @@ func _process(_delta : float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
+	var coff := GameManager.ceiling_offset if GameManager else 180.0
+
 	var field_color := Color.BLUE if polarity == Polarity.NORTH else Color.RED
 	field_color = field_color.darkened(0.5)
 	field_color.a = 0.3
-	draw_rect(Rect2(Vector2(0, -GameManager.ceiling_offset), Vector2(field_length, GameManager.ceiling_offset)), field_color)
+	draw_rect(Rect2(Vector2(0, -coff), Vector2(field_length, coff)), field_color)
 
 	var magnet_color := Color.BLUE if polarity == Polarity.NORTH else Color.RED
 	var magnet_h := 16.0
-	var magnet_y := -GameManager.ceiling_offset if placement == Placement.CEILING else -magnet_h
+	var magnet_y := -coff if placement == Placement.CEILING else -magnet_h
 	draw_rect(Rect2(Vector2(0, magnet_y), Vector2(field_length, magnet_h)), magnet_color)
 
 func setup(p_world_x : float, p_lane : int, p_placement : Placement, p_polarity : Polarity, p_length : float = 128.0) -> void:
@@ -77,5 +81,7 @@ func get_vertical_force(character : Character) -> float:
 		return direction * force_strength
 
 func _exit_tree() -> void:
+	if Engine.is_editor_hint():
+		return
 	if GameManager and GameManager.magnet_manager:
 		GameManager.magnet_manager.unregister_magnet(self)

@@ -1,19 +1,22 @@
+@tool
 class_name Coin
 extends Node2D
 
 enum Type { RED, BLUE, RAINBOW }
 
+@export var coin_type : Type = Type.BLUE
+@export var coin_size : float = 16.0
+
 var world_x : float = 0.0
 var lane : int = 0
-var coin_type : Type = Type.BLUE
-var coin_size : float = 16.0
 var y_offset : float = 0.0
 
 func _ready() -> void:
-	$EditorPlaceholder.queue_free()
+	if Engine.is_editor_hint():
+		return
 
 func _process(_delta : float) -> void:
-	if GameManager.state != GameManager.GameState.PLAYING:
+	if Engine.is_editor_hint() or GameManager.state != GameManager.GameState.PLAYING:
 		return
 	var screen_x := GameManager.scroll_manager.world_to_screen_x(world_x)
 	position.x = screen_x
@@ -51,7 +54,6 @@ func _get_lane_floor_y() -> float:
 
 func _check_collect() -> void:
 	var coin_aabb := CustAABB.new(position - Vector2(coin_size, coin_size) * 0.5, Vector2(coin_size, coin_size))
-	var collected := false
 
 	if GameManager.character_a and GameManager.character_a.is_alive:
 		var ca := GameManager.character_a.physics_body.get_aabb()

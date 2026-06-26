@@ -1,3 +1,4 @@
+@tool
 class_name Character
 extends Node2D
 
@@ -11,8 +12,8 @@ const CHAR_HEIGHT : float = 64.0
 @export var character_polarity : Magnet.Polarity = Magnet.Polarity.NORTH
 @export var re_center_speed : float = 100.0
 @export var custom_fixed_x : float = 0.0
+@export var character_color : Color = Color.DODGER_BLUE
 
-var character_color : Color = Color.DODGER_BLUE
 var physics_body : CustBody
 var current_surface : Surface = Surface.FLOOR
 var magnetism_active : bool = false
@@ -29,13 +30,16 @@ var transition_speed : float = 400.0
 var fall_gravity : float = 800.0
 
 func _ready() -> void:
-	$EditorPlaceholder.queue_free()
+	if Engine.is_editor_hint():
+		return
 	default_x = custom_fixed_x if custom_fixed_x > 0.0 else GameManager.player_fixed_x
 	_setup_lane_positions()
 	physics_body = CustBody.new(Vector2(default_x, floor_y - CHAR_HEIGHT), Vector2(CHAR_WIDTH, CHAR_HEIGHT))
 	GameManager.physics_system.register_body(physics_body)
 
 func _process(delta : float) -> void:
+	if Engine.is_editor_hint():
+		return
 	if not is_alive:
 		return
 	_update_horizontal(delta)
@@ -49,6 +53,10 @@ func _process(delta : float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
+	if Engine.is_editor_hint():
+		draw_rect(Rect2(Vector2.ZERO, Vector2(CHAR_WIDTH, CHAR_HEIGHT)), character_color)
+		draw_rect(Rect2(Vector2.ZERO, Vector2(CHAR_WIDTH, CHAR_HEIGHT)), Color.BLACK, false, 2.0)
+		return
 	if not is_alive:
 		return
 	var color := character_color
@@ -198,5 +206,7 @@ func _clamp_to_bounds() -> void:
 	physics_body.position.x = maxf(physics_body.position.x, 0.0)
 
 func _exit_tree() -> void:
+	if Engine.is_editor_hint():
+		return
 	if GameManager and GameManager.physics_system and physics_body:
 		GameManager.physics_system.unregister_body(physics_body)
