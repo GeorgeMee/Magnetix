@@ -7,3 +7,4 @@ script = ExtResource("1_coin")
 coin_type = 0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+centered = false

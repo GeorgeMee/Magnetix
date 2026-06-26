@@ -7,6 +7,8 @@ script = ExtResource("1_char")
 character_color = Color(0.118, 0.565, 1, 1)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+centered = false
 
 [node name="MagnetismSprite" type="Sprite2D" parent="."]
+centered = false
 visible = false

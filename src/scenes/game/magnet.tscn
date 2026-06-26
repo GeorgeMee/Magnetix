@@ -9,5 +9,7 @@ placement = 0
 field_length = 128.0
 
 [node name="FieldSprite" type="Sprite2D" parent="."]
+centered = false
 
 [node name="BarSprite" type="Sprite2D" parent="."]
+centered = false
