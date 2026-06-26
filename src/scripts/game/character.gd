@@ -37,11 +37,11 @@ var fall_gravity : float = 800.0
 @onready var magnetism_sprite: Sprite2D = $MagnetismSprite
 
 func _ready() -> void:
+	_sync_texture()
 	if Engine.is_editor_hint():
 		sprite.modulate = character_color
 		magnetism_sprite.visible = false
 		return
-	_sync_texture()
 	sprite.modulate = character_color
 	magnetism_sprite.visible = false
 	default_x = custom_fixed_x if custom_fixed_x > 0.0 else GameManager.player_fixed_x
