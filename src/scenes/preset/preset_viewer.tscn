@@ -40,6 +40,19 @@ offset_bottom = -40.0
 grow_horizontal = 0
 text = "生成预设库"
 
+[node name="BtnDeleteAll" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = -30.0
+offset_right = -20.0
+offset_bottom = 10.0
+grow_horizontal = 0
+text = "删除全部"
+
 [node name="Title" type="Label" parent="."]
 layout_mode = 1
 offset_left = 40.0
