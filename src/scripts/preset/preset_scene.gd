@@ -25,8 +25,8 @@ var selected_idx: int = -1
 var selected_type: String = ""
 
 func _ready() -> void:
-	btn_left.pressed.connect(func(): camera_offset += 320.0; queue_redraw())
-	btn_right.pressed.connect(func(): camera_offset -= 320.0; queue_redraw())
+	btn_left.pressed.connect(func(): camera_offset -= 320.0; queue_redraw())
+	btn_right.pressed.connect(func(): camera_offset += 320.0; queue_redraw())
 	btn_reset.pressed.connect(func(): camera_offset = 0.0; queue_redraw())
 	btn_edit.pressed.connect(_toggle_edit)
 	btn_save.pressed.connect(_save_preset)
@@ -52,7 +52,7 @@ func load_preset(data: PresetData) -> void:
 	else:
 		preset = data
 		push_warning("PresetScene: 已加载 %s, 轨迹点=%d, 磁铁=%d, 墙=%d, 地刺=%d, 金币=%d" % [data.preset_name, data.trajectory.size(), data.magnet_blocks.size(), data.walls.size(), data.hazards.size(), data.coins.size()])
-	camera_offset = 0.0
+	camera_offset = _calc_auto_center()
 	_clear_selection()
 	queue_redraw()
 
@@ -202,6 +202,24 @@ func _toggle_edit() -> void:
 	if not edit_mode:
 		_clear_selection()
 
+func _calc_auto_center() -> float:
+	if not preset:
+		return 0.0
+	var min_wx := 1e7
+	if preset.trajectory.size() > 0:
+		min_wx = minf(min_wx, preset.trajectory[0].world_x)
+	for mb in preset.magnet_blocks:
+		min_wx = minf(min_wx, mb.world_x)
+	for w in preset.walls:
+		min_wx = minf(min_wx, w.world_x)
+	for h in preset.hazards:
+		min_wx = minf(min_wx, h.world_x)
+	for c in preset.coins:
+		min_wx = minf(min_wx, c.world_x)
+	if min_wx < 1e6:
+		return min_wx - 200.0
+	return 0.0
+
 func _clear_selection() -> void:
 	selected_idx = -1
 	selected_type = ""
@@ -210,10 +228,10 @@ func _clear_selection() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_left"):
-		camera_offset += 320.0
+		camera_offset -= 320.0
 		queue_redraw()
 	if event.is_action_pressed("ui_right"):
-		camera_offset -= 320.0
+		camera_offset += 320.0
 		queue_redraw()
 
 	if event is InputEventMouseButton and event.pressed and edit_mode:
