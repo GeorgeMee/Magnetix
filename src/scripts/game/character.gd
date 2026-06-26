@@ -39,6 +39,7 @@ func _ready() -> void:
 
 func _process(delta : float) -> void:
 	if Engine.is_editor_hint():
+		queue_redraw()
 		return
 	if not is_alive:
 		return

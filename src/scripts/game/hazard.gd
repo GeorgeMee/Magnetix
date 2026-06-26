@@ -16,7 +16,10 @@ func _ready() -> void:
 	GameManager.physics_system.register_hazard_body(physics_body)
 
 func _process(_delta : float) -> void:
-	if Engine.is_editor_hint() or GameManager.state != GameManager.GameState.PLAYING:
+	if Engine.is_editor_hint():
+		queue_redraw()
+		return
+	if GameManager.state != GameManager.GameState.PLAYING:
 		return
 	if not physics_body:
 		return

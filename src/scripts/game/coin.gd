@@ -16,7 +16,10 @@ func _ready() -> void:
 		return
 
 func _process(_delta : float) -> void:
-	if Engine.is_editor_hint() or GameManager.state != GameManager.GameState.PLAYING:
+	if Engine.is_editor_hint():
+		queue_redraw()
+		return
+	if GameManager.state != GameManager.GameState.PLAYING:
 		return
 	var screen_x := GameManager.scroll_manager.world_to_screen_x(world_x)
 	position.x = screen_x
