@@ -33,7 +33,6 @@ func _open_preset(file_name: String) -> void:
 	get_tree().change_scene_to_file("res://src/scenes/preset/preset_scene.tscn")
 
 func _on_generate() -> void:
-	_preset_data = null
 	get_tree().change_scene_to_file("res://src/scenes/preset/preset_generator.tscn")
 
 func _input(event: InputEvent) -> void:

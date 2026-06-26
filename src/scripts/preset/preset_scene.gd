@@ -64,9 +64,9 @@ func _draw() -> void:
 	_draw_lane(lane_bot, coff, vp_w)
 	_draw_trajectory(lane_top, lane_bot, coff)
 	_draw_magnets(lane_top, lane_bot, coff)
-	_draw_walls(lane_top, lane_bot)
-	_draw_hazards(lane_top, lane_bot)
-	_draw_coins(lane_top, lane_bot)
+	_draw_walls(lane_top, lane_bot, coff)
+	_draw_hazards(lane_top, lane_bot, coff)
+	_draw_coins(lane_top, lane_bot, coff)
 
 	var w := preset.width
 	draw_line(Vector2(w - camera_offset, 0), Vector2(w - camera_offset, get_viewport().get_visible_rect().size.y), Color(Color.WHITE, 0.3), 1.0)
@@ -205,8 +205,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		queue_redraw()
 
 	if event is InputEventMouseButton and event.pressed and edit_mode:
-		var mx := event.position.x + camera_offset
-		var my := event.position.y
+		var mx : float = event.position.x + camera_offset
+		var my : float = event.position.y
 		_select_at(mx, my)
 
 func _select_at(wx: float, wy: float) -> void:
