@@ -12,7 +12,11 @@ const CHAR_HEIGHT : float = 64.0
 @export var character_polarity : Magnet.Polarity = Magnet.Polarity.NORTH
 @export var re_center_speed : float = 100.0
 @export var custom_fixed_x : float = 0.0
-@export var character_color : Color = Color.DODGER_BLUE
+@export var character_color : Color = Color.DODGER_BLUE:
+	set(v):
+		character_color = v
+		if sprite:
+			sprite.modulate = v
 
 var physics_body : CustBody
 var current_surface : Surface = Surface.FLOOR
@@ -29,17 +33,37 @@ var default_x : float = 0.0
 var transition_speed : float = 400.0
 var fall_gravity : float = 800.0
 
+@onready var sprite: Sprite2D = $Sprite2D
+@onready var magnetism_sprite: Sprite2D = $MagnetismSprite
+
 func _ready() -> void:
 	if Engine.is_editor_hint():
+		sprite.modulate = character_color
+		magnetism_sprite.visible = false
 		return
+	_sync_texture()
+	sprite.modulate = character_color
+	magnetism_sprite.visible = false
 	default_x = custom_fixed_x if custom_fixed_x > 0.0 else GameManager.player_fixed_x
 	_setup_lane_positions()
 	physics_body = CustBody.new(Vector2(default_x, floor_y - CHAR_HEIGHT), Vector2(CHAR_WIDTH, CHAR_HEIGHT))
 	GameManager.physics_system.register_body(physics_body)
 
+func _sync_texture() -> void:
+	if not sprite:
+		return
+	var tex := load("res://assets/textures/characters/character_placeholder.png")
+	if tex:
+		sprite.texture = tex
+	var mt := load("res://assets/textures/characters/character_placeholder.png")
+	if mt and magnetism_sprite:
+		magnetism_sprite.texture = mt
+		magnetism_sprite.modulate = Color.WHITE
+
 func _process(delta : float) -> void:
 	if Engine.is_editor_hint():
-		queue_redraw()
+		sprite.modulate = character_color
+		magnetism_sprite.visible = false
 		return
 	if not is_alive:
 		return
@@ -51,22 +75,17 @@ func _process(delta : float) -> void:
 	GameManager.physics_system.resolve_for_body(physics_body)
 	if not GameManager.sim_mode and GameManager.physics_system.is_overlapping_hazard(physics_body):
 		die()
-	queue_redraw()
+	_refresh_visual()
 
-func _draw() -> void:
-	if Engine.is_editor_hint():
-		draw_rect(Rect2(Vector2.ZERO, Vector2(CHAR_WIDTH, CHAR_HEIGHT)), character_color)
-		draw_rect(Rect2(Vector2.ZERO, Vector2(CHAR_WIDTH, CHAR_HEIGHT)), Color.BLACK, false, 2.0)
+func _refresh_visual() -> void:
+	if not sprite:
 		return
-	if not is_alive:
-		return
-	var color := character_color
+	var col := character_color
 	if current_surface == Surface.CEILING:
-		color = color.lightened(0.3)
-	draw_rect(Rect2(Vector2.ZERO, Vector2(CHAR_WIDTH, CHAR_HEIGHT)), color)
-	if magnetism_active:
-		draw_rect(Rect2(Vector2(2, 2), Vector2(CHAR_WIDTH - 4, CHAR_HEIGHT - 4)), Color.WHITE, false, 3.0)
-	draw_rect(Rect2(Vector2.ZERO, Vector2(CHAR_WIDTH, CHAR_HEIGHT)), Color.BLACK, false, 2.0)
+		col = col.lightened(0.3)
+	sprite.modulate = col
+	magnetism_sprite.modulate = Color.WHITE
+	magnetism_sprite.visible = magnetism_active
 
 func _setup_lane_positions() -> void:
 	if lane == Lane.TOP:

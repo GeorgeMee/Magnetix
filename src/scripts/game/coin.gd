@@ -4,47 +4,56 @@ extends Node2D
 
 enum Type { RED, BLUE, RAINBOW }
 
-@export var coin_type : Type = Type.BLUE
+@export var coin_type : Type = Type.BLUE:
+	set(v):
+		coin_type = v
+		_refresh_visual()
 @export var coin_size : float = 16.0
 
 var world_x : float = 0.0
 var lane : int = 0
 var y_offset : float = 0.0
 
+@onready var sprite: Sprite2D = $Sprite2D
+
 func _ready() -> void:
 	if Engine.is_editor_hint():
+		_sync_texture()
+		_refresh_visual()
 		return
+	_sync_texture()
+	_refresh_visual()
+
+func _sync_texture() -> void:
+	var tex := load("res://assets/textures/coins/coin_placeholder.png")
+	if tex and sprite:
+		sprite.texture = tex
+
+func _refresh_visual() -> void:
+	if not sprite:
+		return
+	match coin_type:
+		Type.BLUE:
+			sprite.modulate = Color.DODGER_BLUE
+		Type.RED:
+			sprite.modulate = Color.ORANGE_RED
+		Type.RAINBOW:
+			var t := Time.get_ticks_msec() * 0.003
+			sprite.modulate = Color.from_hsv(fmod(t, 1.0), 1.0, 1.0)
+			return
+	sprite.modulate = sprite.modulate
 
 func _process(_delta : float) -> void:
 	if Engine.is_editor_hint():
-		queue_redraw()
 		return
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
 	var screen_x := GameManager.scroll_manager.world_to_screen_x(world_x)
 	position.x = screen_x
 	position.y = _get_lane_floor_y() - y_offset
+	if coin_type == Type.RAINBOW:
+		_refresh_visual()
 	_check_collect()
-	queue_redraw()
-
-func _draw() -> void:
-	match coin_type:
-		Type.BLUE:
-			_draw_diamond(Color.DODGER_BLUE)
-		Type.RED:
-			_draw_diamond(Color.ORANGE_RED)
-		Type.RAINBOW:
-			var t := Time.get_ticks_msec() * 0.003
-			_draw_diamond(Color.from_hsv(fmod(t, 1.0), 1.0, 1.0))
-
-func _draw_diamond(col: Color) -> void:
-	var h := coin_size * 0.5
-	var p := PackedVector2Array([Vector2(h, 0), Vector2(coin_size, h), Vector2(h, coin_size), Vector2(0, h)])
-	draw_colored_polygon(p, col)
-	draw_line(Vector2(h, 0), Vector2(coin_size, h), Color.WHITE, 1.5)
-	draw_line(Vector2(coin_size, h), Vector2(h, coin_size), Color.WHITE, 1.5)
-	draw_line(Vector2(h, coin_size), Vector2(0, h), Color.WHITE, 1.5)
-	draw_line(Vector2(0, h), Vector2(h, 0), Color.WHITE, 1.5)
 
 func setup(p_world_x : float, p_lane : int, p_type : Type, p_y_offset : float) -> void:
 	world_x = p_world_x

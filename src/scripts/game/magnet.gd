@@ -5,45 +5,70 @@ extends Node2D
 enum Polarity { NORTH, SOUTH }
 enum Placement { FLOOR, CEILING }
 
-@export var polarity : Polarity = Polarity.NORTH
-@export var placement : Placement = Placement.FLOOR
-@export var field_length : float = 128.0
-@export var field_height : float = 64.0
+@export var polarity : Polarity = Polarity.NORTH:
+	set(v):
+		polarity = v
+		_refresh_visual()
+@export var placement : Placement = Placement.FLOOR:
+	set(v):
+		placement = v
+		_refresh_visual()
+@export var field_length : float = 128.0:
+	set(v):
+		field_length = v
+		_refresh_visual()
 @export var force_strength : float = 600.0
 
 var world_x : float = 0.0
 var lane : int = 0
 var field_aabb : CustAABB
 
+@onready var field_sprite: Sprite2D = $FieldSprite
+@onready var bar_sprite: Sprite2D = $BarSprite
+
 func _ready() -> void:
 	if Engine.is_editor_hint():
+		_sync_textures()
+		_refresh_visual()
 		return
+	_sync_textures()
+	_refresh_visual()
 	if GameManager and GameManager.magnet_manager:
 		GameManager.magnet_manager.register_magnet(self)
 
+func _sync_textures() -> void:
+	var bar_tex := load("res://assets/textures/magnets/magnet_bar.png")
+	var field_tex := load("res://assets/textures/magnets/magnet_field.png")
+	if bar_sprite and bar_tex:
+		bar_sprite.texture = bar_tex
+	if field_sprite and field_tex:
+		field_sprite.texture = field_tex
+
+func _refresh_visual() -> void:
+	var coff := GameManager.ceiling_offset if GameManager else 180.0
+	var col := Color.BLUE if polarity == Polarity.NORTH else Color.RED
+
+	if field_sprite:
+		field_sprite.modulate = Color(col, 0.3)
+		field_sprite.position.y = -coff
+		field_sprite.scale = Vector2(field_length / 128.0, coff)
+
+	if bar_sprite:
+		bar_sprite.modulate = col
+		bar_sprite.scale.x = field_length / 128.0
+		if placement == Placement.FLOOR:
+			bar_sprite.position.y = -16.0
+		else:
+			bar_sprite.position.y = -coff
+
 func _process(_delta : float) -> void:
 	if Engine.is_editor_hint():
-		queue_redraw()
 		return
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
 	update_field_aabb()
 	position.x = GameManager.scroll_manager.world_to_screen_x(world_x)
 	position.y = _get_screen_y()
-	queue_redraw()
-
-func _draw() -> void:
-	var coff := GameManager.ceiling_offset if GameManager else 180.0
-
-	var field_color := Color.BLUE if polarity == Polarity.NORTH else Color.RED
-	field_color = field_color.darkened(0.5)
-	field_color.a = 0.3
-	draw_rect(Rect2(Vector2(0, -coff), Vector2(field_length, coff)), field_color)
-
-	var magnet_color := Color.BLUE if polarity == Polarity.NORTH else Color.RED
-	var magnet_h := 16.0
-	var magnet_y := -coff if placement == Placement.CEILING else -magnet_h
-	draw_rect(Rect2(Vector2(0, magnet_y), Vector2(field_length, magnet_h)), magnet_color)
 
 func setup(p_world_x : float, p_lane : int, p_placement : Placement, p_polarity : Polarity, p_length : float = 128.0) -> void:
 	world_x = p_world_x

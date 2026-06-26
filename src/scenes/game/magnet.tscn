@@ -7,4 +7,7 @@ script = ExtResource("1_magnet")
 polarity = 0
 placement = 0
 field_length = 128.0
-field_height = 64.0
+
+[node name="FieldSprite" type="Sprite2D" parent="."]
+
+[node name="BarSprite" type="Sprite2D" parent="."]

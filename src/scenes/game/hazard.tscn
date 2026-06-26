@@ -4,5 +4,4 @@
 
 [node name="Hazard" type="Node2D"]
 script = ExtResource("1_hazard")
-spike_width = 24.0
-spike_height = 24.0
+count = 1
