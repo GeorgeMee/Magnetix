@@ -23,7 +23,7 @@ func ensure_trajectory(from_world_x : float, lane_a_pol : Magnet.Polarity, lane_
 		start_x = maxf(last_pt.world_x + GameManager.sim_decision_interval, from_world_x)
 		surf_a = last_pt.char_a_surface as int
 		surf_b = last_pt.char_b_surface as int
-	var new_points := sim_ai.generate(lane_a_pol, lane_b_pol, start_x, needed_end - start_x, GameManager.sim_decision_interval, surf_a, surf_b)
+	var new_points := sim_ai.generate(lane_a_pol, lane_b_pol, start_x, needed_length, GameManager.sim_decision_interval, surf_a, surf_b)
 	trajectory.append_array(new_points)
 
 func get_chunk_layout(chunk_world_x : float, lane : int, chunk_width : float) -> ChunkLayout:

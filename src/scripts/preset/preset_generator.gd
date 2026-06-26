@@ -24,7 +24,9 @@ func _ready() -> void:
 	GameManager.magnet_manager = magnet_manager
 	GameManager.choreographer = choreographer
 
-	DirAccess.make_dir_recursive_absolute("res://presets")
+	var da := DirAccess.open("res://")
+	if da:
+		da.make_dir_recursive("presets")
 
 	_spawn_characters()
 	GameManager.character_a = character_a
@@ -79,7 +81,10 @@ func _save_chunks() -> void:
 		_convert_layout(layout_a, 0, preset.magnet_blocks, preset.walls, preset.hazards, preset.coins)
 		_convert_layout(layout_b, 1, preset.magnet_blocks, preset.walls, preset.hazards, preset.coins)
 
-		ResourceSaver.save(preset, "res://presets/chunk_%04d.tres" % chunk_index)
+		var path := "res://presets/chunk_%04d.tres" % chunk_index
+		var err := ResourceSaver.save(preset, path)
+		if err != OK:
+			push_error("保存预设失败 %s: %d" % [path, err])
 		chunk_index += 1
 		last_recorded_wx += chunk_w
 
