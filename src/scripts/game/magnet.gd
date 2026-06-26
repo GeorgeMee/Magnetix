@@ -45,7 +45,10 @@ func _sync_textures() -> void:
 		field_sprite.texture = field_tex
 
 func _refresh_visual() -> void:
-	var coff: float = GameManager.get("ceiling_offset") if GameManager else 180.0
+	const DEFAULT_COFF := 180.0
+	var coff := DEFAULT_COFF
+	if not Engine.is_editor_hint() and GameManager:
+		coff = GameManager.ceiling_offset
 	var col := Color.BLUE if polarity == Polarity.NORTH else Color.RED
 
 	if field_sprite:
