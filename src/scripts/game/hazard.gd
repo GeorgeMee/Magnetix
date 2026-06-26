@@ -8,6 +8,7 @@ var spike_height : float = 24.0
 var physics_body : CustBody
 
 func _ready() -> void:
+	$EditorPlaceholder.queue_free()
 	physics_body = CustBody.new(Vector2.ZERO, Vector2(spike_width, spike_height))
 	GameManager.physics_system.register_hazard_body(physics_body)
 

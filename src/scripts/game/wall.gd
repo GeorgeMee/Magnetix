@@ -8,6 +8,7 @@ var screen_height : float = 64.0
 var physics_body : CustBody
 
 func _ready() -> void:
+	$EditorPlaceholder.queue_free()
 	physics_body = CustBody.new(Vector2.ZERO, Vector2(screen_width, screen_height))
 	GameManager.physics_system.register_static_body(physics_body)
 

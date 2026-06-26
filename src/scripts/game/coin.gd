@@ -9,6 +9,9 @@ var coin_type : Type = Type.BLUE
 var coin_size : float = 16.0
 var y_offset : float = 0.0
 
+func _ready() -> void:
+	$EditorPlaceholder.queue_free()
+
 func _process(_delta : float) -> void:
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return

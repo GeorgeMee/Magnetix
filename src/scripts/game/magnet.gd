@@ -15,6 +15,7 @@ var lane : int = 0
 var field_aabb : CustAABB
 
 func _ready() -> void:
+	$EditorPlaceholder.queue_free()
 	if GameManager and GameManager.magnet_manager:
 		GameManager.magnet_manager.register_magnet(self)
 

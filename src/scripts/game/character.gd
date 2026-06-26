@@ -28,9 +28,8 @@ var default_x : float = 0.0
 var transition_speed : float = 400.0
 var fall_gravity : float = 800.0
 
-@onready var sprite : Sprite2D = $Sprite2D
-
 func _ready() -> void:
+	$EditorPlaceholder.queue_free()
 	default_x = custom_fixed_x if custom_fixed_x > 0.0 else GameManager.player_fixed_x
 	_setup_lane_positions()
 	physics_body = CustBody.new(Vector2(default_x, floor_y - CHAR_HEIGHT), Vector2(CHAR_WIDTH, CHAR_HEIGHT))

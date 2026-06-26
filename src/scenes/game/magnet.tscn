@@ -5,4 +5,17 @@
 [node name="Magnet" type="Node2D"]
 script = ExtResource("1_magnet")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="EditorPlaceholder" type="Control" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = -180.0
+offset_right = 360.0
+
+[node name="EditorField" type="ColorRect" parent="EditorPlaceholder"]
+color = Color(0.216, 0.318, 0.584, 0.25)
+size = Vector2(360, 180)
+
+[node name="EditorBar" type="ColorRect" parent="EditorPlaceholder"]
+color = Color(0, 0.478, 1, 1)
+size = Vector2(360, 16)
+offset_top = 164.0
