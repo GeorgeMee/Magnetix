@@ -25,6 +25,8 @@ func _refresh_list() -> void:
 func _add_preset_button(file_name: String) -> void:
 	var btn := Button.new()
 	btn.text = file_name.trim_suffix(".tres")
+	btn.custom_minimum_size = Vector2(0, 40)
+	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	btn.pressed.connect(func(): _open_preset(file_name))
 	list_container.add_child(btn)
 

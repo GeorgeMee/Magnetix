@@ -46,15 +46,17 @@ func _ready() -> void:
 		GameManager.pending_preset_path = ""
 
 func load_preset(data: PresetData) -> void:
-	preset = data
+	if not data:
+		push_error("PresetScene: 加载预设失败，数据为 null")
+		preset = null
+	else:
+		preset = data
+		push_warning("PresetScene: 已加载 %s, 轨迹点=%d, 磁铁=%d, 墙=%d, 地刺=%d, 金币=%d" % [data.preset_name, data.trajectory.size(), data.magnet_blocks.size(), data.walls.size(), data.hazards.size(), data.coins.size()])
 	camera_offset = 0.0
 	_clear_selection()
 	queue_redraw()
 
 func _draw() -> void:
-	if not preset:
-		return
-
 	var lane_top := GameManager.lane_top_y
 	var lane_bot := GameManager.lane_bottom_y
 	var coff := GameManager.ceiling_offset
@@ -62,11 +64,21 @@ func _draw() -> void:
 
 	_draw_lane(lane_top, coff, vp_w)
 	_draw_lane(lane_bot, coff, vp_w)
-	_draw_trajectory(lane_top, lane_bot, coff)
-	_draw_magnets(lane_top, lane_bot, coff)
-	_draw_walls(lane_top, lane_bot, coff)
-	_draw_hazards(lane_top, lane_bot, coff)
-	_draw_coins(lane_top, lane_bot, coff)
+
+	if not preset:
+		draw_string(ThemeDB.fallback_font, Vector2(20, 100), "未加载预设数据", HORIZONTAL_ALIGNMENT_LEFT, -1, 20)
+		return
+
+	if preset.trajectory.size() >= 2:
+		_draw_trajectory(lane_top, lane_bot, coff)
+	if preset.magnet_blocks.size() > 0:
+		_draw_magnets(lane_top, lane_bot, coff)
+	if preset.walls.size() > 0:
+		_draw_walls(lane_top, lane_bot, coff)
+	if preset.hazards.size() > 0:
+		_draw_hazards(lane_top, lane_bot, coff)
+	if preset.coins.size() > 0:
+		_draw_coins(lane_top, lane_bot, coff)
 
 	var w := preset.width
 	draw_line(Vector2(w - camera_offset, 0), Vector2(w - camera_offset, get_viewport().get_visible_rect().size.y), Color(Color.WHITE, 0.3), 1.0)
