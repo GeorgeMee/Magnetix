@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3 uid="uid://presetviewer"]
+
+[ext_resource type="Script" path="res://src/scripts/preset/preset_viewer.gd" id="1_script"]
+
+[node name="PresetViewer" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 80.0
+offset_right = -40.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ListContainer" type="VBoxContainer" parent="ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BtnGenerate" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = -80.0
+offset_right = -20.0
+offset_bottom = -40.0
+grow_horizontal = 0
+text = "生成预设库"
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 20.0
+offset_right = 400.0
+offset_bottom = 60.0
+text = "预设库"

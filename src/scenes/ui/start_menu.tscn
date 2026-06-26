@@ -21,7 +21,7 @@ anchor_bottom = 0.5
 offset_left = -150.0
 offset_top = -150.0
 offset_right = 150.0
-offset_bottom = 280.0
+offset_bottom = 340.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -60,3 +60,8 @@ text = "混合场景"
 unique_name_in_owner = true
 layout_mode = 2
 text = "预生成"
+
+[node name="PresetButton" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "预设库"

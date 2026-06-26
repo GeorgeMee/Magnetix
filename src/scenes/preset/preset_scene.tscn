@@ -1,0 +1,111 @@
+[gd_scene load_steps=2 format=3 uid="uid://presetscene"]
+
+[ext_resource type="Script" path="res://src/scripts/preset/preset_scene.gd" id="1_script"]
+
+[node name="PresetScene" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="BtnLeft" type="Button" parent="UILayer"]
+unique_name_in_owner = true
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 100.0
+offset_bottom = 60.0
+text = "◀"
+
+[node name="BtnReset" type="Button" parent="UILayer"]
+unique_name_in_owner = true
+offset_left = 110.0
+offset_top = 20.0
+offset_right = 190.0
+offset_bottom = 60.0
+text = "↺"
+
+[node name="BtnRight" type="Button" parent="UILayer"]
+unique_name_in_owner = true
+offset_left = 200.0
+offset_top = 20.0
+offset_right = 280.0
+offset_bottom = 60.0
+text = "▶"
+
+[node name="BtnEdit" type="Button" parent="UILayer"]
+unique_name_in_owner = true
+offset_left = 290.0
+offset_top = 20.0
+offset_right = 410.0
+offset_bottom = 60.0
+text = "编辑:关"
+
+[node name="BtnSave" type="Button" parent="UILayer"]
+unique_name_in_owner = true
+offset_left = 420.0
+offset_top = 20.0
+offset_right = 520.0
+offset_bottom = 60.0
+text = "保存"
+
+[node name="EditPanel" type="Panel" parent="UILayer"]
+unique_name_in_owner = true
+visible = false
+offset_left = 1600.0
+offset_top = 200.0
+offset_right = 1900.0
+offset_bottom = 600.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UILayer/EditPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="EditLabel" type="Label" parent="UILayer/EditPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = ""
+
+[node name="BtnPolarity" type="Button" parent="UILayer/EditPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "N"
+
+[node name="BtnPlacement" type="Button" parent="UILayer/EditPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "地板"
+
+[node name="BtnCountMinus" type="Button" parent="UILayer/EditPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "宽-"
+
+[node name="BtnCountPlus" type="Button" parent="UILayer/EditPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "宽+"
+
+[node name="BtnHeightMinus" type="Button" parent="UILayer/EditPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "高-"
+
+[node name="BtnHeightPlus" type="Button" parent="UILayer/EditPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "高+"
+
+[node name="BtnXMinus" type="Button" parent="UILayer/EditPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "← X"
+
+[node name="BtnXPlus" type="Button" parent="UILayer/EditPanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "X →"
