@@ -68,6 +68,8 @@ func _save_chunks() -> void:
 	var traj := choreographer.trajectory
 	if traj.is_empty():
 		return
+	if last_recorded_wx == 0.0:
+		last_recorded_wx = floorf(traj[0].world_x / chunk_w) * chunk_w
 	var max_wx := traj[-1].world_x
 	while last_recorded_wx < max_wx:
 		var wx := last_recorded_wx
@@ -80,6 +82,10 @@ func _save_chunks() -> void:
 		var layout_b := choreographer.build_layout(traj, wx, 1, chunk_w, Magnet.Polarity.SOUTH)
 		_convert_layout(layout_a, 0, preset.magnet_blocks, preset.walls, preset.hazards, preset.coins)
 		_convert_layout(layout_b, 1, preset.magnet_blocks, preset.walls, preset.hazards, preset.coins)
+
+		if preset.trajectory.is_empty() and preset.magnet_blocks.is_empty():
+			last_recorded_wx += chunk_w
+			continue
 
 		var path := "res://presets/chunk_%04d.tres" % chunk_index
 		var err := ResourceSaver.save(preset, path)
