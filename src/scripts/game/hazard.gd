@@ -17,8 +17,9 @@ func _ready() -> void:
 		_rebuild_grid()
 		return
 	_rebuild_grid()
-	physics_body = CustBody.new(Vector2.ZERO, Vector2(count * 24.0, unit_height))
-	GameManager.physics_system.register_hazard_body(physics_body)
+	if GameManager and GameManager.physics_system:
+		physics_body = CustBody.new(Vector2.ZERO, Vector2(count * 24.0, unit_height))
+		GameManager.physics_system.register_hazard_body(physics_body)
 
 func _rebuild_grid() -> void:
 	for child in get_children():
@@ -39,6 +40,8 @@ func _process(_delta : float) -> void:
 	if Engine.is_editor_hint():
 		return
 	if GameManager.state != GameManager.GameState.PLAYING:
+		return
+	if not GameManager.scroll_manager:
 		return
 	if not physics_body:
 		return

@@ -21,7 +21,7 @@ anchor_bottom = 0.5
 offset_left = -150.0
 offset_top = -150.0
 offset_right = 150.0
-offset_bottom = 340.0
+offset_bottom = 380.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -65,3 +65,7 @@ text = "预生成"
 unique_name_in_owner = true
 layout_mode = 2
 text = "预设库"
+
+[node name="PresetPlayButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Preset Play"

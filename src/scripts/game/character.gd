@@ -44,6 +44,7 @@ func _ready() -> void:
 		return
 	sprite.modulate = character_color
 	magnetism_sprite.visible = false
+	magnetism_sprite.modulate = Color(1, 1, 1, 0.3)
 	default_x = custom_fixed_x if custom_fixed_x > 0.0 else GameManager.player_fixed_x
 	_setup_lane_positions()
 	physics_body = CustBody.new(Vector2(default_x, floor_y - CHAR_HEIGHT), Vector2(CHAR_WIDTH, CHAR_HEIGHT))
@@ -84,7 +85,7 @@ func _refresh_visual() -> void:
 	if current_surface == Surface.CEILING:
 		col = col.lightened(0.3)
 	sprite.modulate = col
-	magnetism_sprite.modulate = Color.WHITE
+	magnetism_sprite.modulate = Color(1, 1, 1, 0.3)
 	magnetism_sprite.visible = magnetism_active
 
 func _setup_lane_positions() -> void:

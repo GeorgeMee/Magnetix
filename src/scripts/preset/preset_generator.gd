@@ -114,11 +114,14 @@ func _convert_layout(layout: ChunkLayout, lane: int, magnets: Array[MagnetBlock]
 		var obs := ObstacleBlock.new()
 		obs.world_x = w["world_x"]
 		obs.lane = lane
+		obs.count = 1
+		obs.height_units = 1
 		walls.append(obs)
 	for h in layout.hazards:
 		var obs := ObstacleBlock.new()
 		obs.world_x = h["world_x"]
 		obs.lane = lane
+		obs.count = 1
 		hazards.append(obs)
 	for c in layout.coins:
 		var cb := CoinBlock.new()
@@ -148,6 +151,11 @@ func _transition_back() -> void:
 	transitioned = true
 	GameManager.character_a = null
 	GameManager.character_b = null
+	GameManager.physics_system = null
+	GameManager.scroll_manager = null
+	GameManager.magnet_manager = null
+	GameManager.choreographer = null
+	GameManager.state = GameManager.GameState.MENU
 	get_tree().change_scene_to_file("res://src/scenes/preset/preset_viewer.tscn")
 
 func _input(event: InputEvent) -> void:

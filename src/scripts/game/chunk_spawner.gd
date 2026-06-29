@@ -8,6 +8,7 @@ var active_hazards : Array[Hazard]
 var active_coins : Array[Coin]
 var active_magnets : Array[Magnet]
 var next_spawn_world_x : float = 0.0
+var _spawned_keys : Dictionary = {}
 
 var wall_scene : PackedScene = preload("res://src/scenes/game/wall.tscn")
 var hazard_scene : PackedScene = preload("res://src/scenes/game/hazard.tscn")
@@ -42,24 +43,40 @@ func _spawn_chunk(world_x : float) -> void:
 			_spawn_coin(c["world_x"], lane, c["type"], c["y_off"])
 
 func _spawn_wall(world_x : float, lane : int) -> void:
+	var key := "wall_%d_%.1f" % [lane, world_x]
+	if _spawned_keys.has(key):
+		return
+	_spawned_keys[key] = true
 	var wall := wall_scene.instantiate() as Wall
 	wall.setup(world_x, lane)
 	add_child(wall)
 	active_walls.append(wall)
 
 func _spawn_coin(world_x : float, lane : int, type : Coin.Type, y_off : float) -> void:
+	var key := "coin_%d_%.1f" % [lane, world_x]
+	if _spawned_keys.has(key):
+		return
+	_spawned_keys[key] = true
 	var coin := coin_scene.instantiate() as Coin
 	coin.setup(world_x, lane, type, y_off)
 	add_child(coin)
 	active_coins.append(coin)
 
 func _spawn_hazard(world_x : float, lane : int) -> void:
+	var key := "hazard_%d_%.1f" % [lane, world_x]
+	if _spawned_keys.has(key):
+		return
+	_spawned_keys[key] = true
 	var hazard := hazard_scene.instantiate() as Hazard
 	hazard.setup(world_x, lane)
 	add_child(hazard)
 	active_hazards.append(hazard)
 
 func _spawn_magnet(world_x : float, lane : int, placement : Magnet.Placement, polarity : Magnet.Polarity, length : float) -> void:
+	var key := "magnet_%d_%.1f_%d" % [lane, world_x, placement]
+	if _spawned_keys.has(key):
+		return
+	_spawned_keys[key] = true
 	var magnet := magnet_scene.instantiate() as Magnet
 	magnet.setup(world_x, lane, placement, polarity, length)
 	add_child(magnet)
@@ -71,12 +88,14 @@ func _cleanup_offscreen() -> void:
 	var i := active_walls.size() - 1
 	while i >= 0:
 		if active_walls[i].world_x < despawn_world_x:
+			_spawned_keys.erase("wall_%d_%.1f" % [active_walls[i].lane, active_walls[i].world_x])
 			active_walls[i].queue_free()
 			active_walls.remove_at(i)
 		i -= 1
 	i = active_hazards.size() - 1
 	while i >= 0:
 		if active_hazards[i].world_x < despawn_world_x:
+			_spawned_keys.erase("hazard_%d_%.1f" % [active_hazards[i].lane, active_hazards[i].world_x])
 			active_hazards[i].queue_free()
 			active_hazards.remove_at(i)
 		i -= 1
@@ -84,12 +103,15 @@ func _cleanup_offscreen() -> void:
 	while i >= 0:
 		if not is_instance_valid(active_coins[i]) or active_coins[i].world_x < despawn_world_x:
 			if is_instance_valid(active_coins[i]):
+				_spawned_keys.erase("coin_%d_%.1f" % [active_coins[i].lane, active_coins[i].world_x])
 				active_coins[i].queue_free()
 			active_coins.remove_at(i)
 		i -= 1
 	i = active_magnets.size() - 1
 	while i >= 0:
 		if active_magnets[i].world_x < despawn_world_x:
-			active_magnets[i].queue_free()
+			var m := active_magnets[i]
+			_spawned_keys.erase("magnet_%d_%.1f_%d" % [m.lane, m.world_x, m.placement])
+			m.queue_free()
 			active_magnets.remove_at(i)
 		i -= 1

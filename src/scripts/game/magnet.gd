@@ -69,6 +69,8 @@ func _process(_delta : float) -> void:
 		return
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
+	if not GameManager.scroll_manager:
+		return
 	update_field_aabb()
 	position.x = GameManager.scroll_manager.world_to_screen_x(world_x)
 	position.y = _get_screen_y()

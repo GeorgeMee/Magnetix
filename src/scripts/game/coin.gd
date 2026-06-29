@@ -48,6 +48,8 @@ func _process(_delta : float) -> void:
 		return
 	if GameManager.state != GameManager.GameState.PLAYING:
 		return
+	if not GameManager.scroll_manager:
+		return
 	var screen_x := GameManager.scroll_manager.world_to_screen_x(world_x)
 	position.x = screen_x
 	position.y = _get_lane_floor_y() - y_offset

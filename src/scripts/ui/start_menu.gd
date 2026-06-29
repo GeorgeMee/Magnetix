@@ -12,6 +12,7 @@ func _ready() -> void:
 	%HybridButton.pressed.connect(_on_hybrid)
 	%GenerateButton.pressed.connect(_on_generate)
 	%PresetButton.pressed.connect(_on_preset)
+	$VBoxContainer/PresetPlayButton.pressed.connect(_on_preset_play)
 
 func _on_start() -> void:
 	get_tree().change_scene_to_file("res://src/scenes/main/main.tscn")
@@ -30,6 +31,9 @@ func _on_generate() -> void:
 
 func _on_preset() -> void:
 	get_tree().change_scene_to_file("res://src/scenes/preset/preset_viewer.tscn")
+
+func _on_preset_play() -> void:
+	get_tree().change_scene_to_file("res://src/scenes/sim/preset_play.tscn")
 
 func _on_settings() -> void:
 	if settings_panel:

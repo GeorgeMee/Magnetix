@@ -19,6 +19,7 @@ func _ready() -> void:
 	btn_edit.pressed.connect(_toggle_edit)
 	btn_save.pressed.connect(_save_preset)
 
+	GameManager.state = GameManager.GameState.MENU
 	if not GameManager.pending_preset_path.is_empty():
 		_file_path = GameManager.pending_preset_path
 		load_preset(load(_file_path) as PresetData)
@@ -74,7 +75,7 @@ func _spawn_type(blocks: Array, pscene: PackedScene, type_name: String) -> void:
 		if type_name == "wall":
 			node.position.y = lane_y - node.height_units * 64.0
 		elif type_name == "hazard":
-			node.position.y = lane_y - 24.0
+			node.position.y = lane_y - node.unit_height
 		elif type_name == "magnet":
 			node.position.y = lane_y
 		elif type_name == "coin":
